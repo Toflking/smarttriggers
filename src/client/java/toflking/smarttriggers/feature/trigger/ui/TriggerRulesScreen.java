@@ -10,6 +10,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import toflking.smarttriggers.core.config.ConfigIO;
 import toflking.smarttriggers.feature.trigger.RuntimeReloader;
@@ -41,6 +43,7 @@ public class TriggerRulesScreen extends Screen {
     private static final int ACTION_ROW_BUTTON_GAP = 4;
     private static final int ACTION_TIMER_TYPE_WIDTH = 40;
     private static final int COOLDOWN_TIMER_TYPE_WIDTH = 40;
+    private static final int CASE_SENSITIVE_WIDTH = 128;
 
     private final Screen parent;
     private final TriggerRulesController controller;
@@ -430,6 +433,41 @@ public class TriggerRulesScreen extends Screen {
         }
 
         @Override
+        public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
+            if (isRightClick(click)) {
+                if (inputTypeButton.isMouseOver(click.x(), click.y())) {
+                    playButtonClickSound();
+                    rule.setInputType(rule.getInputType().previous());
+                    controller.dirty = true;
+                    rebuildRuleWidgets();
+                    setFocused(inputTypeButton);
+                    return true;
+                }
+                if (rule.getInputType() == RuleInputType.TEXT && sourceOrOperatorButton.isMouseOver(click.x(), click.y())) {
+                    playButtonClickSound();
+                    rule.setSource(rule.getSource().previous());
+                    controller.dirty = true;
+                    rebuildRuleWidgets();
+                    setFocused(sourceOrOperatorButton);
+                    return true;
+                }
+                if (matchButton.isMouseOver(click.x(), click.y())) {
+                    playButtonClickSound();
+                    if (rule.getInputType() == RuleInputType.TEXT) {
+                        rule.setMatchType(rule.getMatchType().previous());
+                    } else {
+                        cycleStateOperator(rule, false);
+                    }
+                    controller.dirty = true;
+                    rebuildRuleWidgets();
+                    setFocused(matchButton);
+                    return true;
+                }
+            }
+            return super.mouseClicked(click, doubleClick);
+        }
+
+        @Override
         public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             int y = getY();
             inputTypeButton.setMessage(Text.literal(rule.getInputType().getDisplay()));
@@ -504,7 +542,7 @@ public class TriggerRulesScreen extends Screen {
             }).build());
 
             cooldownField = addWidget(new TextFieldWidget(textRenderer, 0, 0, 90, 20, Text.literal("Cooldown")));
-            cooldownField.setText(Objects.toString(rule.getCooldownString(), "0"));
+            cooldownField.setText(Objects.toString(rule.getCooldownString(), "0:00"));
             cooldownField.setPlaceholder(Text.literal("Cooldown"));
             cooldownField.setChangedListener(value -> {
                 rule.setCooldownString(value);
@@ -522,6 +560,19 @@ public class TriggerRulesScreen extends Screen {
         }
 
         @Override
+        public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
+            if (isRightClick(click) && cooldownTypeButton.isMouseOver(click.x(), click.y())) {
+                playButtonClickSound();
+                TimerFormat currentType = rule.getCooldownType();
+                rule.setCooldownType((currentType == null ? TimerFormat.SECONDS : currentType).previous());
+                controller.dirty = true;
+                setFocused(cooldownTypeButton);
+                return true;
+            }
+            return super.mouseClicked(click, doubleClick);
+        }
+
+        @Override
         public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             int y = getY();
             boolean textInput = rule.getInputType() == RuleInputType.TEXT;
@@ -531,7 +582,7 @@ public class TriggerRulesScreen extends Screen {
 
             syncField(keyField, Objects.toString(rule.getKey(), ""));
             syncField(patternField, Objects.toString(rule.getPattern(), ""));
-            syncField(cooldownField, Objects.toString(rule.getCooldownString(), "0"));
+            syncField(cooldownField, Objects.toString(rule.getCooldownString(), "0:00"));
             int x = contentLeft();
             if (textInput) {
                 keyField.visible = false;
@@ -567,7 +618,7 @@ public class TriggerRulesScreen extends Screen {
             if (textInput) {
                 caseSensitiveCheckbox.setPosition(x, y + 2);
                 caseSensitiveCheckbox.render(ctx, mouseX, mouseY, tickProgress);
-                x += 128;
+                x += CASE_SENSITIVE_WIDTH;
             }
 
             cooldownField.setWidth(cooldownFieldWidth());
@@ -651,6 +702,29 @@ public class TriggerRulesScreen extends Screen {
                 addWidget(component.widget());
                 fieldComponents.add(component);
             }
+        }
+
+        @Override
+        public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
+            if (isRightClick(click)) {
+                if (actionTypeButton.isMouseOver(click.x(), click.y())) {
+                    playButtonClickSound();
+                    action.setType(action.getType().previous());
+                    controller.dirty = true;
+                    rebuildRuleWidgets();
+                    setFocused(actionTypeButton);
+                    return true;
+                }
+                if (timerTypeButton != null && timerTypeButton.isMouseOver(click.x(), click.y())) {
+                    playButtonClickSound();
+                    TimerFormat currentType = action.getTimerType();
+                    action.setTimerType((currentType == null ? TimerFormat.SECONDS : currentType).previous());
+                    controller.dirty = true;
+                    setFocused(timerTypeButton);
+                    return true;
+                }
+            }
+            return super.mouseClicked(click, doubleClick);
         }
 
         @Override
@@ -932,17 +1006,32 @@ public class TriggerRulesScreen extends Screen {
     }
 
     private void cycleStateOperator(RuleEditorState rule) {
+        cycleStateOperator(rule, true);
+    }
+
+    private void cycleStateOperator(RuleEditorState rule, boolean forward) {
         StateOperator operator = rule.getStateOperator();
         if (operator == null) {
             rule.setStateOperator(StateOperator.IS);
             return;
         }
 
-        StateOperator next = operator.next();
+        StateOperator next = forward ? operator.next() : operator.previous();
         while (!supportsOperator(rule.getInputType(), next) && next != operator) {
-            next = next.next();
+            next = forward ? next.next() : next.previous();
         }
         rule.setStateOperator(next);
+    }
+
+    private boolean isRightClick(net.minecraft.client.gui.Click click) {
+        return click.button() == 1;
+    }
+
+    private void playButtonClickSound() {
+        if (client == null) {
+            return;
+        }
+        client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     private boolean supportsOperator(RuleInputType inputType, StateOperator operator) {
@@ -1060,7 +1149,7 @@ public class TriggerRulesScreen extends Screen {
     }
 
     private int textPatternWidth() {
-        return Math.max(180, contentWidth() - 230);
+        return Math.max(140, contentWidth() - cooldownControlsWidth() - CASE_SENSITIVE_WIDTH - 24);
     }
 
     private int stateKeyWidth() {

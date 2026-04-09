@@ -54,4 +54,28 @@ public enum ActionType {
             case REMOVE_COUNTER -> CHAT;
         };
     }
+
+    public ActionType previous() {
+        return switch (this) {
+            case CHAT -> REMOVE_COUNTER;
+            case TITLE -> CHAT;
+            case ACTIONBAR -> TITLE;
+            case SOUND -> ACTIONBAR;
+            case COMMAND -> SOUND;
+
+            case SET_FLAG -> COMMAND;
+            case TOGGLE_FLAG -> SET_FLAG;
+            case REMOVE_FLAG -> TOGGLE_FLAG;
+
+            case START_TIMER -> REMOVE_FLAG;
+            case STOP_TIMER -> START_TIMER;
+            case RESET_TIMER -> STOP_TIMER;
+
+            case REMOVE_TIMER -> RESET_TIMER;
+            case INCREMENT_COUNTER -> REMOVE_TIMER;
+            case SET_COUNTER -> INCREMENT_COUNTER;
+            case RESET_COUNTER -> SET_COUNTER;
+            case REMOVE_COUNTER -> RESET_COUNTER;
+        };
+    }
 }

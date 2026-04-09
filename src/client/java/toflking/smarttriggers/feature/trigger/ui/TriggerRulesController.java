@@ -72,7 +72,7 @@ public class TriggerRulesController {
         rule.setKey("");
         rule.setPattern("");
         rule.setCaseSensitive(false);
-        rule.setCooldownString("0");
+        rule.setCooldownString("0:00");
         rule.setCooldownType(TimerFormat.SECONDS);
 
         ActionEditorState action = new ActionEditorState();

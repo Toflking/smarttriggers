@@ -24,4 +24,13 @@ public enum RuleInputType {
             case TIMER -> TEXT;
         };
     }
+
+    public RuleInputType previous() {
+        return switch (this) {
+            case TEXT -> TIMER;
+            case FLAG -> TEXT;
+            case COUNTER -> FLAG;
+            case TIMER -> COUNTER;
+        };
+    }
 }

@@ -42,4 +42,19 @@ public enum StateOperator {
             case STOPPED -> IS;
         };
     }
+
+    public StateOperator previous() {
+        return switch (this) {
+            case IS -> STOPPED;
+            case IS_NOT -> IS;
+            case GREATER_THAN -> IS_NOT;
+            case GREATER_OR_EQUAL -> GREATER_THAN;
+            case LESS_THAN -> GREATER_OR_EQUAL;
+            case LESS_OR_EQUAL -> LESS_THAN;
+            case EXISTS -> LESS_OR_EQUAL;
+            case MISSING -> EXISTS;
+            case RUNNING -> MISSING;
+            case STOPPED -> RUNNING;
+        };
+    }
 }

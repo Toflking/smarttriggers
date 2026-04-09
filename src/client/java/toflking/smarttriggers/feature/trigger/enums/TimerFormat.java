@@ -23,4 +23,12 @@ public enum TimerFormat {
         };
     }
 
+    public TimerFormat previous() {
+        return switch (this) {
+            case SECONDS -> HOURS;
+            case MINUTES -> SECONDS;
+            case HOURS -> MINUTES;
+        };
+    }
+
 }

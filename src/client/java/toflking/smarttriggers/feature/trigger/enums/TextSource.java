@@ -26,4 +26,14 @@ public enum TextSource {
             case TABLIST -> CHAT;
         };
     }
+
+    public TextSource previous() {
+        return switch (this) {
+            case CHAT -> TABLIST;
+            case ACTIONBAR -> CHAT;
+            case TITLE -> ACTIONBAR;
+            case SCOREBOARD -> TITLE;
+            case TABLIST -> SCOREBOARD;
+        };
+    }
 }

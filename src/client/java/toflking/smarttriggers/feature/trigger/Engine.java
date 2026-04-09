@@ -33,10 +33,10 @@ public class Engine implements RuntimeReloader {
         ActionFactory factory = new ActionFactory();
         compiler = new Compiler(factory);
         Matcher matcher = new Matcher();
-        CooldownTracker tracker = new CooldownTracker();
+        CooldownTracker cooldownTracker = new CooldownTracker();
         TriggerRulesController controller = new TriggerRulesController(config, hudEditController);
         List<CompiledTriggerRule> compiledTriggerRules = compiler.compile(config.getTrigger());
-        manager = new Manager(matcher, context, tracker, stateStore, compiledTriggerRules);
+        manager = new Manager(matcher, context, cooldownTracker, stateStore, compiledTriggerRules);
         stateStore.addListener(manager::onStateChanged);
         ClientTickEvents.END_CLIENT_TICK.register(client -> manager.tickTimers());
         registerSources(manager);

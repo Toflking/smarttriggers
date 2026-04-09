@@ -26,4 +26,14 @@ public enum MatchType {
             case REGEX -> CONTAINS;
         };
     }
+
+    public MatchType previous() {
+        return switch (this) {
+            case CONTAINS -> REGEX;
+            case EQUALS -> CONTAINS;
+            case STARTS_WITH -> EQUALS;
+            case ENDS_WITH -> STARTS_WITH;
+            case REGEX -> ENDS_WITH;
+        };
+    }
 }

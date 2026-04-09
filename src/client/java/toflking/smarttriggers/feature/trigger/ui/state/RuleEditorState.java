@@ -31,7 +31,7 @@ public class RuleEditorState {
             rule.setInputType(RuleInputType.TEXT);
             rule.setStateOperator(StateOperator.IS);
             rule.setKey("");
-            rule.setCooldownString("0");
+            rule.setCooldownString("0:00");
             rule.setCooldownType(TimerFormat.SECONDS);
             return rule;
         }
