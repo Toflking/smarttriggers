@@ -19,6 +19,7 @@ import toflking.smarttriggers.feature.trigger.enums.ActionType;
 import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 import toflking.smarttriggers.feature.trigger.validation.ValidationIssue;
 import toflking.smarttriggers.feature.trigger.validation.ValidationResult;
+import toflking.smarttriggers.feature.trigger.validation.config.TriggerConfigValidator;
 import toflking.smarttriggers.feature.trigger.validation.editor.TriggerEditorValidator;
 import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
 import toflking.smarttriggers.feature.trigger.enums.StateOperator;
@@ -402,6 +403,9 @@ public class TriggerRulesScreen extends Screen {
                     Text.literal(rule.getInputType().getDisplay()),
                     button -> {
                         rule.setInputType(rule.getInputType().next());
+                        if (rule.getInputType() != RuleInputType.TEXT && !supportsOperator(rule.getInputType(), rule.getStateOperator())) {
+                            cycleStateOperator(rule);
+                        }
                         controller.dirty = true;
                         rebuildRuleWidgets();
                     }
