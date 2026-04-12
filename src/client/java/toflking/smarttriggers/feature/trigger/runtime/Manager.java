@@ -39,7 +39,7 @@ public class Manager {
         if (!rule.isEnabled()) return;
         if (!matcher.matches(rule, event)) return;
         if (cooldownTracker.isOnCooldown(rule, now)) return;
-        executor.executeAll(rule.getActions(), event);
+        executor.executeAllActions(rule.getActions(), event);
         cooldownTracker.markTriggered(rule, now);
     }
 
@@ -55,7 +55,7 @@ public class Manager {
             if (!operatorComparer.matches(rule, change, stateStore)) {
                 continue;
             }
-            executor.executeAll(rule.getActions(), new TriggerEvent(null, null, null, now, false));
+            executor.executeAllActions(rule.getActions(), new TriggerEvent(null, null, null, now, false));
             cooldownTracker.markTriggered(rule, now);
         }
     }
@@ -76,7 +76,7 @@ public class Manager {
             if (!operatorComparer.matches(rule, snapshot, stateStore)) {
                 continue;
             }
-            executor.executeAll(rule.getActions(), new TriggerEvent(null, null, null, now, false));
+            executor.executeAllActions(rule.getActions(), new TriggerEvent(null, null, null, now, false));
             cooldownTracker.markTriggered(rule, now);
         }
     }

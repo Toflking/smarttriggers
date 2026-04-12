@@ -16,7 +16,7 @@ import toflking.smarttriggers.feature.trigger.runtime.matching.Matcher;
 import toflking.smarttriggers.feature.trigger.source.*;
 import toflking.smarttriggers.feature.trigger.state.TriggerStateStore;
 import toflking.smarttriggers.feature.trigger.ui.TriggerRulesController;
-import toflking.smarttriggers.feature.trigger.ui.TriggerRulesScreen;
+import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreen;
 import toflking.smarttriggers.feature.trigger.validation.config.TriggerConfigValidator;
 import toflking.smarttriggers.feature.trigger.validation.ValidationIssue;
 import toflking.smarttriggers.feature.trigger.validation.ValidationResult;

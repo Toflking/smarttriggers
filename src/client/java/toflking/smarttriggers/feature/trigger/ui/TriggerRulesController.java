@@ -4,7 +4,6 @@ import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.trigger.config.TriggerConfig;
 import toflking.smarttriggers.feature.trigger.config.TriggerRuleConfig;
 import toflking.smarttriggers.feature.hud.HudEditController;
-import toflking.smarttriggers.feature.trigger.enums.ActionType;
 import toflking.smarttriggers.feature.trigger.enums.MatchType;
 import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
 import toflking.smarttriggers.feature.trigger.enums.StateOperator;
@@ -12,6 +11,7 @@ import toflking.smarttriggers.feature.trigger.enums.TextSource;
 import toflking.smarttriggers.feature.trigger.enums.TimerFormat;
 import toflking.smarttriggers.feature.trigger.ui.state.ActionEditorState;
 import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
+import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,9 +75,7 @@ public class TriggerRulesController {
         rule.setCooldownString("0:00");
         rule.setCooldownType(TimerFormat.SECONDS);
 
-        ActionEditorState action = new ActionEditorState();
-        action.setType(ActionType.CHAT);
-        action.setText("");
+        ActionEditorState action = TriggerRulesUiSupport.createDefaultAction();
 
         rule.getActions().add(action);
         rules.add(rule);

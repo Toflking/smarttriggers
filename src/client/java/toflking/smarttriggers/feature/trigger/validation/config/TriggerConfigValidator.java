@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static toflking.smarttriggers.feature.trigger.validation.StateOperatorSupport.isOperatorSupported;
+
 public final class TriggerConfigValidator {
     private TriggerConfigValidator() {
     }
@@ -92,45 +94,6 @@ public final class TriggerConfigValidator {
             issues.addAll(validateAction(ruleIndex, i, action));
         }
         return issues;
-    }
-
-    public static boolean isOperatorSupported(StateOperator operator, RuleInputType inputType) {
-        if (operator == null || operator.isUnary() || inputType == null) {
-            return false;
-        }
-        switch (inputType) {
-            case FLAG -> {
-                switch (operator) {
-                    case GREATER_THAN, GREATER_OR_EQUAL, LESS_THAN, LESS_OR_EQUAL, RUNNING, STOPPED -> {
-                        return false;
-                    }
-                    default -> {
-                        return true;
-                    }
-                }
-            }
-            case COUNTER -> {
-                switch (operator) {
-                    case RUNNING, STOPPED -> {
-                        return false;
-                    }
-                    default -> {
-                        return true;
-                    }
-                }
-            }
-            case TIMER -> {
-                switch (operator) {
-                    case EXISTS, MISSING -> {
-                        return false;
-                    }
-                    default -> {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     public static List<ValidationIssue> validateAction(int ruleIndex, int actionIndex, TriggerActionConfig action) {
