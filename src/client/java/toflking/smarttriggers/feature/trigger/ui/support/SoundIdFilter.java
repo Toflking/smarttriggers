@@ -1,21 +1,12 @@
 package toflking.smarttriggers.feature.trigger.ui.support;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import toflking.smarttriggers.feature.trigger.sound.SoundIds;
 
 import java.util.Comparator;
 import java.util.List;
 
 public class SoundIdFilter {
     private static final int MAX_RESULTS = 8;
-    private static final List<String> SOUND_IDS = Registries.SOUND_EVENT.getIds().stream()
-            .map(Identifier::toString)
-            .sorted()
-            .toList();
-
-    public static List<String> getSoundIds() {
-        return SOUND_IDS;
-    }
 
     public static List<String> filterSoundIds(String query) {
         String normalizedQuery = normalize(query);
@@ -23,7 +14,7 @@ public class SoundIdFilter {
             return List.of();
         }
 
-        return SOUND_IDS.stream()
+        return SoundIds.getAllSoundIds().stream()
                 .map(id -> new RankedSoundId(id, score(id, normalizedQuery)))
                 .filter(ranked -> ranked.score() >= 0)
                 .sorted(Comparator

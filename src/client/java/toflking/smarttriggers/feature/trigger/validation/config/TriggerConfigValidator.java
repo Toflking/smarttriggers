@@ -7,6 +7,7 @@ import toflking.smarttriggers.feature.trigger.enums.ActionType;
 import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
 import toflking.smarttriggers.feature.trigger.enums.StateOperator;
 import toflking.smarttriggers.feature.trigger.enums.TimerFormat;
+import toflking.smarttriggers.feature.trigger.sound.SoundIds;
 import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 import toflking.smarttriggers.feature.trigger.validation.ValidationIssue;
 
@@ -139,7 +140,14 @@ public final class TriggerConfigValidator {
     private static void requireSoundId(int ruleIndex, int actionIndex, TriggerActionConfig action, List<ValidationIssue> issues) {
         if (isBlank(action.getSoundId())) {
             issues.add(ValidationIssue.action(ruleIndex, actionIndex, ValidationField.ACTION_SOUND_ID, "Sound id is required"));
+            return;
         }
+        for (String soundId : SoundIds.getAllSoundIds()) {
+            if (soundId.equals(action.getSoundId().trim())) {
+                return;
+            }
+        }
+        issues.add(ValidationIssue.action(ruleIndex, actionIndex, ValidationField.ACTION_SOUND_ID, "This is not a valid Sound ID"));
     }
 
     private static void requireKey(int ruleIndex, int actionIndex, TriggerActionConfig action, List<ValidationIssue> issues) {
