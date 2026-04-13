@@ -7,7 +7,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static toflking.smarttriggers.SmartTriggers.LOGGER;
+import static toflking.smarttriggers.SmartTriggersClient.LOGGER;
 import static toflking.smarttriggers.core.config.ModConfig.*;
 
 public class ConfigIO {

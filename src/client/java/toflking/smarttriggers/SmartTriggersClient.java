@@ -1,6 +1,8 @@
 package toflking.smarttriggers;
 
 import net.fabricmc.api.ClientModInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import toflking.smarttriggers.core.config.ConfigIO;
 import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.hud.HudCommands;
@@ -10,6 +12,9 @@ import toflking.smarttriggers.feature.trigger.state.TriggerStateStore;
 import toflking.smarttriggers.feature.trigger.Engine;
 
 public class SmartTriggersClient implements ClientModInitializer {
+	public static final String MOD_ID = "smarttriggers";
+	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
 	@Override
 	public void onInitializeClient() {
 		ModConfig config = ConfigIO.loadOrCreateDefaultConfig();

@@ -3,7 +3,7 @@ package toflking.smarttriggers.core.config;
 import toflking.smarttriggers.feature.hud.config.HudConfig;
 import toflking.smarttriggers.feature.trigger.config.TriggerConfig;
 
-import static toflking.smarttriggers.SmartTriggers.LOGGER;
+import static toflking.smarttriggers.SmartTriggersClient.LOGGER;
 
 public class ModConfig {
     private int version;

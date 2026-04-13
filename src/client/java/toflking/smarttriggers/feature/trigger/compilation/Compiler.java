@@ -10,7 +10,7 @@ import toflking.smarttriggers.feature.trigger.validation.ValidationIssue;
 import java.util.ArrayList;
 import java.util.List;
 
-import static toflking.smarttriggers.SmartTriggers.LOGGER;
+import static toflking.smarttriggers.SmartTriggersClient.LOGGER;
 
 public class Compiler {
     private final ActionFactory factory;

@@ -3,21 +3,18 @@
 	"id": "smarttriggers",
 	"version": "${version}",
 	"name": "SmartTriggers",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "SmartTriggers is a client-side Fabric mod that lets you create your own automation system inside Minecraft. Define rules that react to in-game text or internal state and execute actions automatically.",
 	"authors": [
-		"Me!"
+		"Toflking"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/Toflking/smarttriggers",
+		"sources": "https://github.com/Toflking/smarttriggers"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/smarttriggers/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"toflking.smarttriggers.SmartTriggers"
-		],
 		"client": [
 			"toflking.smarttriggers.SmartTriggersClient"
 		]
