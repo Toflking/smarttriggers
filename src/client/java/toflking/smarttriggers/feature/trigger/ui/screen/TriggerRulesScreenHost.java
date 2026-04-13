@@ -10,6 +10,9 @@ import toflking.smarttriggers.feature.trigger.ui.state.ActionEditorState;
 import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
 import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 public interface TriggerRulesScreenHost {
     TextRenderer textRenderer();
 
@@ -48,4 +51,14 @@ public interface TriggerRulesScreenHost {
     ValidationField toValidationField(ActionFieldSpec spec);
 
     int rowHeight();
+
+    void clearOverlaySuggestions();
+
+    void showOverlaySuggestions(int x, int y, int width, List<String> suggestions);
+
+    void renderOverlaySuggestions(DrawContext ctx);
+
+    void setSuggestionsOpened(boolean suggestionsOpened);
+
+    void setOverlaySelectHandler(Consumer<String> overlaySelectHandler);
 }

@@ -20,7 +20,7 @@ public class TimerElement extends HudElement {
 
     @Override
     public String displayName() {
-        return  displayName;
+        return displayName;
     }
 
     @Override

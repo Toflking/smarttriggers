@@ -17,7 +17,7 @@ public class TitleSource {
     }
 
     public void register() {
-        // User mixin hook
+        // Use mixin hook
     }
 
     public static void runWithoutCapture(Runnable action) {
@@ -36,9 +36,9 @@ public class TitleSource {
         }
     }
 
-    public static void handleSubTitleStatic(Text subTitle) {
+    public static void handleSubTitleStatic(Text subtitle) {
         if (!(instance == null || suppressCapture)) {
-            instance.onSubTitleChange(subTitle);
+            instance.onSubTitleChange(subtitle);
         }
     }
 
@@ -50,9 +50,9 @@ public class TitleSource {
         manager.handleEvent(event);
     }
 
-    public void onSubTitleChange(Text subTitle) {
-        if (subTitle == null) return;
-        String msg = TextNormalizer.normalizeText(subTitle);
+    public void onSubTitleChange(Text subtitle) {
+        if (subtitle == null) return;
+        String msg = TextNormalizer.normalizeText(subtitle);
         if (msg.isBlank()) return;
         TriggerEvent event = new TriggerEvent(TextSource.TITLE, msg, null, System.currentTimeMillis(), true);
         manager.handleEvent(event);

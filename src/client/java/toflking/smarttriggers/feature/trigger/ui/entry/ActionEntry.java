@@ -1,13 +1,18 @@
 package toflking.smarttriggers.feature.trigger.ui.entry;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.registry.Registries;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import toflking.smarttriggers.feature.trigger.enums.ActionType;
 import toflking.smarttriggers.feature.trigger.enums.TimerFormat;
 import toflking.smarttriggers.feature.trigger.ui.layout.TriggerRulesLayout;
+import toflking.smarttriggers.feature.trigger.ui.support.SoundIdFilter;
 import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 import toflking.smarttriggers.feature.trigger.ui.meta.ActionFieldSpec;
 import toflking.smarttriggers.feature.trigger.ui.meta.ActionUiMeta;
@@ -19,6 +24,7 @@ import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class ActionEntry extends AbstractTriggerRuleEntry {
     private static final int ACTION_FIELD_MAX_LENGTH = 512;
@@ -28,6 +34,7 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
     private final int actionIndex;
     private final ButtonWidget actionTypeButton;
     private final ButtonWidget timerTypeButton;
+    private final ButtonWidget previewButton;
     private final ButtonWidget addButton;
     private final ButtonWidget removeButton;
     private final List<ActionFieldSpec> fieldSpecs;
@@ -57,6 +64,13 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
                     host.markDirty();
                 }
         ).dimensions(0, 0, TriggerRulesLayout.ACTION_TIMER_TYPE_WIDTH, 20).build())
+                : null;
+
+        previewButton = action.getType() == ActionType.SOUND
+                ? addWidget(ButtonWidget.builder(
+                Text.literal("▶"),
+                button -> playPreviewSound()
+        ).dimensions(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build())
                 : null;
 
         removeButton = actionIndex == 0 ? null : addWidget(ButtonWidget.builder(
@@ -127,7 +141,7 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         }
 
         int currentX = host.layout().actionFieldX();
-        int[] fieldWidths = TriggerRulesUiSupport.computeFieldWidths(fieldSpecs, host.layout().actionContentFieldWidth(timerTypeButton != null), TriggerRulesLayout.ACTION_FIELD_GAP);
+        int[] fieldWidths = TriggerRulesUiSupport.computeFieldWidths(fieldSpecs, actionContentFieldWidth(), TriggerRulesLayout.ACTION_FIELD_GAP);
         for (int i = 0; i < fieldComponents.size(); i++) {
             int width = fieldWidths[i];
             fieldComponents.get(i).render(ctx, currentX, y, width, mouseX, mouseY, tickProgress);
@@ -146,6 +160,11 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
             if (host.hasActionIssue(rule, actionIndex, ValidationField.ACTION_TIMER_TYPE)) {
                 host.drawErrorOutline(ctx, timerTypeButton);
             }
+        }
+
+        if (previewButton != null) {
+            previewButton.setPosition(actionPreviewButtonX(), y);
+            previewButton.render(ctx, mouseX, mouseY, tickProgress);
         }
 
         if (removeButton != null) {
@@ -181,6 +200,20 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         field.setMaxLength(ACTION_FIELD_MAX_LENGTH);
         field.setText(Objects.toString(TriggerRulesUiSupport.readActionField(action, spec.key()), ""));
         field.setPlaceholder(Text.literal(spec.label()));
+        if (spec.key().equals("soundId")) {
+            return new SoundIdFieldComponent(field, value -> {
+                TriggerRulesUiSupport.writeActionField(action, spec.key(), value);
+                host.markDirty();
+            }) {
+                @Override
+                void beforeRender() {
+                    String expected = Objects.toString(TriggerRulesUiSupport.readActionField(action, spec.key()), "");
+                    if (!Objects.equals(field.getText(), expected) && !field.isFocused()) {
+                        field.setText(expected);
+                    }
+                }
+            };
+        }
         field.setChangedListener(value -> {
             TriggerRulesUiSupport.writeActionField(action, spec.key(), value);
             host.markDirty();
@@ -194,6 +227,40 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
                 }
             }
         };
+    }
+
+    private int actionContentFieldWidth() {
+        int trailingControlX;
+        if (timerTypeButton != null) {
+            trailingControlX = host.layout().actionTimerTypeButtonX();
+        } else if (previewButton != null) {
+            trailingControlX = actionPreviewButtonX();
+        } else {
+            trailingControlX = host.layout().actionRemoveButtonX();
+        }
+        return Math.max(70, trailingControlX - TriggerRulesLayout.ACTION_FIELD_GAP - host.layout().actionFieldX());
+    }
+
+    private int actionPreviewButtonX() {
+        return host.layout().actionRemoveButtonX() - TriggerRulesLayout.ACTION_FIELD_GAP - TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH;
+    }
+
+    private void playPreviewSound() {
+        String soundId = Objects.toString(action.getSoundId(), "").trim();
+        if (soundId.isEmpty()) {
+            return;
+        }
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+
+        try {
+            SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(soundId));
+            mc.player.playSound(soundEvent, 1.0F, 1.0F);
+        } catch (RuntimeException ignored) {
+        }
     }
 
     private abstract static class ActionFieldComponent {
@@ -215,5 +282,53 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         }
 
         abstract void beforeRender();
+    }
+
+    private abstract class SoundIdFieldComponent extends ActionFieldComponent {
+        private static final int MAX_SUGGESTIONS = 8;
+        private static final int SUGGESTION_OFFSET_Y = 2;
+
+        private final List<String> suggestions = new ArrayList<>();
+        private final TextFieldWidget field;
+        private final Consumer<String> onChanged;
+
+        private SoundIdFieldComponent(TextFieldWidget field, Consumer<String> onChanged) {
+            super(field);
+            this.field = field;
+            this.onChanged = onChanged;
+
+            field.setChangedListener(value -> {
+                onChanged.accept(value);
+                calculateNewSuggestions(value);
+            });
+            calculateNewSuggestions(field.getText());
+            host.setOverlaySelectHandler(selectedSuggestion -> {
+                field.setText(selectedSuggestion);
+                onChanged.accept(selectedSuggestion);
+            });
+        }
+
+        public void calculateNewSuggestions(String query) {
+            suggestions.clear();
+            suggestions.addAll(SoundIdFilter.filterSoundIds(query));
+        }
+
+        @Override
+        public void render(DrawContext ctx, int x, int y, int width, int mouseX, int mouseY, float tickProgress) {
+            super.render(ctx, x, y, width, mouseX, mouseY, tickProgress);
+            if (!field.isFocused() || suggestions.isEmpty()) {
+                host.setSuggestionsOpened(false);
+                return;
+            }
+
+            int visibleSuggestions = Math.min(MAX_SUGGESTIONS, suggestions.size());
+            host.setOverlaySelectHandler(selectedSuggestion -> {
+                field.setText(selectedSuggestion);
+                onChanged.accept(selectedSuggestion);
+            });
+            host.showOverlaySuggestions(x, y + field.getHeight() + SUGGESTION_OFFSET_Y, width, suggestions.subList(0, visibleSuggestions));
+            host.setSuggestionsOpened(true);
+        }
+
     }
 }

@@ -17,8 +17,8 @@ public class SmartTriggersClient implements ClientModInitializer {
 
 		HudManager mgr = HudManager.init(config, stateStore);
 		HudEditController ctrl = HudEditController.init(mgr, config);
-
 		mgr.setHudEditController(ctrl);
+
 		HudCommands.registerCommands(ctrl);
 
 		Engine engine = new Engine();
