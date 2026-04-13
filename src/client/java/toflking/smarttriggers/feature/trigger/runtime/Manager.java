@@ -39,7 +39,7 @@ public class Manager {
         if (!rule.isEnabled()) return;
         if (!matcher.matches(rule, event)) return;
         if (cooldownTracker.isOnCooldown(rule, now)) return;
-        executor.executeAllActions(rule.getActions(), event);
+        executor.executeAllActions(rule.getActions());
         cooldownTracker.markTriggered(rule, now);
     }
 
@@ -55,7 +55,7 @@ public class Manager {
             if (!operatorComparer.matches(rule, change, stateStore)) {
                 continue;
             }
-            executor.executeAllActions(rule.getActions(), new TriggerEvent(null, null, null, now, false));
+            executor.executeAllActions(rule.getActions());
             cooldownTracker.markTriggered(rule, now);
         }
     }
@@ -72,11 +72,11 @@ public class Manager {
             if (cooldownTracker.isOnCooldown(rule, now)) {
                 continue;
             }
-            TimerChange snapshot = createTimerSnapshot(rule.getKey(), now);
+            TimerChange snapshot = createTimerSnapshot(rule.getKey());
             if (!operatorComparer.matches(rule, snapshot, stateStore)) {
                 continue;
             }
-            executor.executeAllActions(rule.getActions(), new TriggerEvent(null, null, null, now, false));
+            executor.executeAllActions(rule.getActions());
             cooldownTracker.markTriggered(rule, now);
         }
     }
@@ -95,10 +95,6 @@ public class Manager {
         this.rules = rules;
     }
 
-    public TriggerStateStore getStateStore() {
-        return stateStore;
-    }
-
     private boolean isMatchingStateRule(CompiledTriggerRule rule, StateChange change) {
         return rule.isEnabled()
                 && rule.getInputType() != null
@@ -107,10 +103,10 @@ public class Manager {
                 && rule.getKey().equals(change.key());
     }
 
-    private TimerChange createTimerSnapshot(String key, long now) {
+    private TimerChange createTimerSnapshot(String key) {
         TriggerStateStore.TimerState timerState = stateStore.getTimers().get(key);
         long remainingMs = timerState == null ? 0L : timerState.getRemainingMs();
         boolean running = timerState != null && timerState.isRunning();
-        return new TimerChange(key, timerState != null, timerState != null, remainingMs, remainingMs, running, running, now);
+        return new TimerChange(key, timerState != null, timerState != null, remainingMs, remainingMs, running, running);
     }
 }

@@ -5,6 +5,5 @@ public record CounterChange(
         boolean existedBefore,
         boolean existsNow,
         int oldValue,
-        int newValue,
-        long timestampMs
+        int newValue
 ) implements StateChange {}

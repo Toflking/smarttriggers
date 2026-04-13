@@ -64,11 +64,6 @@ public final class TriggerRulesLayout {
         return actionTypeX() + actionTypeWidth() + ACTION_FIELD_GAP;
     }
 
-    public int actionContentFieldWidth(boolean hasTimerTypeButton) {
-        int trailingControlX = hasTimerTypeButton ? actionTimerTypeButtonX() : actionRemoveButtonX();
-        return Math.max(70, trailingControlX - ACTION_FIELD_GAP - actionFieldX());
-    }
-
     public int actionRemoveButtonX() {
         return contentRight() - ((ACTION_ROW_BUTTON_WIDTH * 2) + ACTION_ROW_BUTTON_GAP);
     }

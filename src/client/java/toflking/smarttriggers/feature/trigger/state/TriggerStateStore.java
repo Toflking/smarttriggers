@@ -28,7 +28,7 @@ public class TriggerStateStore {
             return;
         }
         flags.put(flag, value);
-        notifyListeners(new FlagChange(flag, existedBefore, true, oldValue, value, System.currentTimeMillis()));
+        notifyListeners(new FlagChange(flag, existedBefore, true, oldValue, value));
     }
 
     public boolean getFlag(String flag) {
@@ -37,15 +37,13 @@ public class TriggerStateStore {
         }
         return false;
     }
-    public boolean hasFlag(String flag) {
-        return flags.containsKey(flag);
-    }
+
     public void removeFlag(String flag) {
         if (!flags.containsKey(flag)) {
             return;
         }
         boolean oldValue = flags.remove(flag);
-        notifyListeners(new FlagChange(flag, true, false, oldValue, false, System.currentTimeMillis()));
+        notifyListeners(new FlagChange(flag, true, false, oldValue, false));
     }
     public void toggleFlag(String flag) {
         setFlag(flag, !getFlag(flag));
@@ -61,7 +59,7 @@ public class TriggerStateStore {
             return;
         }
         counters.put(flag, value);
-        notifyListeners(new CounterChange(flag, existedBefore, true, oldValue, value, System.currentTimeMillis()));
+        notifyListeners(new CounterChange(flag, existedBefore, true, oldValue, value));
     }
 
     public int getCounter(String flag) {
@@ -78,7 +76,7 @@ public class TriggerStateStore {
             return;
         }
         int oldValue = counters.remove(flag);
-        notifyListeners(new CounterChange(flag, true, false, oldValue, 0, System.currentTimeMillis()));
+        notifyListeners(new CounterChange(flag, true, false, oldValue, 0));
     }
 
     public void startTimer(String flag, long durationMs) {
@@ -89,7 +87,7 @@ public class TriggerStateStore {
         long normalizedDurationMs = Math.max(0L, durationMs);
         long now = System.currentTimeMillis();
         timers.put(flag, new TimerState(normalizedDurationMs, normalizedDurationMs, true, now));
-        notifyListeners(new TimerChange(flag, existedBefore, true, oldRemainingMs, normalizedDurationMs, oldRunning, true, now));
+        notifyListeners(new TimerChange(flag, existedBefore, true, oldRemainingMs, normalizedDurationMs, oldRunning, true));
     }
     public void stopTimer(String flag) {
         pauseTimer(flag);
@@ -99,21 +97,19 @@ public class TriggerStateStore {
         if (timerState == null || !timerState.isRunning()) {
             return;
         }
-        long now = System.currentTimeMillis();
         long oldRemainingMs = timerState.getRemainingMs();
         TimerState paused = timerState.pause();
         timers.put(flag, paused);
-        notifyListeners(new TimerChange(flag, true, true, oldRemainingMs, paused.getRemainingMs(), true, false, now));
+        notifyListeners(new TimerChange(flag, true, true, oldRemainingMs, paused.getRemainingMs(), true, false));
     }
     public void resetTimer(String flag) {
         TimerState timerState = timers.get(flag);
         if (timerState != null) {
-            long now = System.currentTimeMillis();
             long oldRemainingMs = timerState.getRemainingMs();
             boolean oldRunning = timerState.isRunning();
             TimerState reset = timerState.reset();
             timers.put(flag, reset);
-            notifyListeners(new TimerChange(flag, true, true, oldRemainingMs, reset.getRemainingMs(), oldRunning, true, now));
+            notifyListeners(new TimerChange(flag, true, true, oldRemainingMs, reset.getRemainingMs(), oldRunning, true));
         }
     }
     public void removeTimer(String flag) {
@@ -121,15 +117,7 @@ public class TriggerStateStore {
         if (timerState == null) {
             return;
         }
-        notifyListeners(new TimerChange(flag, true, false, timerState.getRemainingMs(), 0L, timerState.isRunning(), false, System.currentTimeMillis()));
-    }
-
-    public long getRemainingTimerMs(String flag) {
-        TimerState timerState = timers.get(flag);
-        if (timerState == null) {
-            return 0;
-        }
-        return timerState.getRemainingMs();
+        notifyListeners(new TimerChange(flag, true, false, timerState.getRemainingMs(), 0L, timerState.isRunning(), false));
     }
 
     public Map<String, Boolean> getFlags() {
@@ -155,10 +143,6 @@ public class TriggerStateStore {
             this.remainingMs = remainingMs;
             this.running = running;
             this.startedAtMs = startedAtMs;
-        }
-
-        public long getDurationMs() {
-            return durationMs;
         }
 
         public boolean isRunning() {

@@ -14,20 +14,14 @@ public abstract class HudElement {
 
     public abstract HudElementConfig createDefaultConfig();
 
-    public void tick(HudRenderContext ctx) {
-    }
-
     public abstract void render(HudRenderContext ctx);
 
     public void renderBackground(HudRenderContext ctx, Rect bounds, int color) {
-        ctx.getDrawContext().fill(bounds.getX(), bounds.getY(), bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), color);
+        ctx.getDrawContext().fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), color);
     }
 
     public abstract int width(HudRenderContext ctx);
 
     public abstract int height(HudRenderContext ctx);
 
-    public boolean allowDrag() {
-        return true;
-    }
 }

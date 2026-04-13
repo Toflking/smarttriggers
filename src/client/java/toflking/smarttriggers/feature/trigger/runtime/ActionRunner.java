@@ -11,9 +11,9 @@ public class ActionRunner {
         this.context = context;
     }
 
-    public void executeAllActions(List<ExecutableAction> actions, TriggerEvent event) {
+    public void executeAllActions(List<ExecutableAction> actions) {
         for (ExecutableAction action : actions) {
-            action.execute(event, context);
+            action.execute(context);
         }
 
     }}

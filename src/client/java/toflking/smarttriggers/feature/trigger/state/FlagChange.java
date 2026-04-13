@@ -5,6 +5,5 @@ public record FlagChange(
         boolean existedBefore,
         boolean existsNow,
         boolean oldValue,
-        boolean newValue,
-        long timestampMs
+        boolean newValue
 ) implements StateChange {}

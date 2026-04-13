@@ -1,7 +1,6 @@
 package toflking.smarttriggers.feature.trigger.action;
 
 import toflking.smarttriggers.feature.trigger.runtime.ActionExecutorContext;
-import toflking.smarttriggers.feature.trigger.runtime.TriggerEvent;
 
 public class ChatAction implements ExecutableAction {
     private final String message;
@@ -11,7 +10,7 @@ public class ChatAction implements ExecutableAction {
     }
 
     @Override
-    public void execute(TriggerEvent event, ActionExecutorContext ctx) {
+    public void execute(ActionExecutorContext ctx) {
         ctx.sendChatMessage(message);
     }
 }

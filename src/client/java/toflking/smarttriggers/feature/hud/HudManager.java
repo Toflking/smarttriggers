@@ -1,9 +1,11 @@
 package toflking.smarttriggers.feature.hud;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.util.Identifier;
 import org.joml.Matrix3x2fStack;
 import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.hud.config.HudElementConfig;
@@ -38,7 +40,12 @@ public class HudManager {
                 instance.ensureElementConfigExists(e);
             }
 
-            HudRenderCallback.EVENT.register(instance::renderAll);
+            HudElementRegistry.attachElementAfter(
+                    VanillaHudElements.MISC_OVERLAYS,
+                    Identifier.of("smarttriggers", "hud"),
+                    instance::renderAll
+            );
+
 
             END_CLIENT_TICK.register(client -> instance.tickAll());
 
@@ -78,13 +85,7 @@ public class HudManager {
 
     private void tickAll() {
         if (hudEditController == null) return;
-        if (mc.world == null || mc.player == null) return;
         HudRenderContext ctx = new HudRenderContext(mc, config, hudEditController.isEditMode(), stateStore);
-        for (HudElement element : elements.values()) {
-            if (element.isEnabled(config)) {
-                element.tick(ctx);
-            }
-        }
         hudEditController.onClientTick(ctx);
     }
 
@@ -95,7 +96,7 @@ public class HudManager {
         for (HudElement element : elements.values()) {
             HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(element);
             Rect bounds = HudLayout.computeBounds(element, ecfg, ctx);
-            if (ecfg.isBackground() && ecfg.isEnabled()) {
+            if (ecfg.isBackground() && element.isEnabled(config)) {
                 element.renderBackground(ctx, bounds, ecfg.getBackgroundColor());
             }
         }
@@ -104,8 +105,8 @@ public class HudManager {
             HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(element);
             Rect bounds = HudLayout.computeBounds(element, ecfg, ctx);
             if (ecfg.isEnabled()) {
-                int finalX = bounds.getX();
-                int finalY = bounds.getY();
+                int finalX = bounds.x();
+                int finalY = bounds.y();
                 float scale = ecfg.getScale();
                 Matrix3x2fStack matrices = drawContext.getMatrices();
                 matrices.pushMatrix();

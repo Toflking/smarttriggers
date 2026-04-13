@@ -5,13 +5,9 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 public final class LegacyFormattingTextParser {
     private static final char SECTION_SIGN = '§';
     private static final char AMPERSAND = '&';
-    private static final Map<Formatting, Boolean> EMPTY_FLAGS = new EnumMap<>(Formatting.class);
 
     private LegacyFormattingTextParser() {
     }

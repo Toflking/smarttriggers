@@ -43,10 +43,6 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     private final TriggerRulesController controller;
     private final RuntimeReloader applier;
 
-    private ButtonWidget newRuleButton;
-    private ButtonWidget moveHudButton;
-    private ButtonWidget saveButton;
-    private ButtonWidget closeButton;
     private RuleListWidget ruleListWidget;
     private final List<ValidationIssue> validationIssues = new ArrayList<>();
     private String validationSummary;
@@ -71,7 +67,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
         clearChildren();
         layout = new TriggerRulesLayout(width);
 
-        newRuleButton = addDrawableChild(ButtonWidget.builder(
+        addDrawableChild(ButtonWidget.builder(
                 Text.literal("New Rule"),
                 button -> {
                     controller.addRule();
@@ -79,7 +75,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
                 }
         ).dimensions((width / 2) - 106, 20, 100, 20).build());
 
-        moveHudButton = addDrawableChild(ButtonWidget.builder(
+        addDrawableChild(ButtonWidget.builder(
                 Text.literal("Edit Gui Locations"),
                 button -> {
                     if (saveConfig()) {
@@ -88,12 +84,12 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
                 }
         ).dimensions((width / 2) + 6, 20, 100, 20).build());
 
-        saveButton = addDrawableChild(ButtonWidget.builder(
+        addDrawableChild(ButtonWidget.builder(
                 Text.literal("Save"),
                 button -> save()
         ).dimensions((width / 2) - 106, height - 24, 100, 20).build());
 
-        closeButton = addDrawableChild(ButtonWidget.builder(
+        addDrawableChild(ButtonWidget.builder(
                 Text.literal("Close"),
                 button -> close()
         ).dimensions((width / 2) + 6, height - 24, 100, 20).build());
@@ -428,7 +424,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
                 return true;
             }
         }
-        return super.mouseClicked(click, doubled);
+        return true;
     }
 
     @Override

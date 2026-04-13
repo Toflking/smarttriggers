@@ -1,7 +1,6 @@
 package toflking.smarttriggers.feature.trigger.compilation;
 
 import toflking.smarttriggers.feature.trigger.config.TriggerActionConfig;
-import toflking.smarttriggers.feature.trigger.action.ExecutableAction;
 import toflking.smarttriggers.feature.trigger.action.*;
 import toflking.smarttriggers.feature.trigger.action.state.counter.IncrementCounterAction;
 import toflking.smarttriggers.feature.trigger.action.state.counter.RemoveCounterAction;

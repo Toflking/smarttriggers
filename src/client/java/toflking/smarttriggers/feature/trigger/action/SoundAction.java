@@ -1,7 +1,6 @@
 package toflking.smarttriggers.feature.trigger.action;
 
 import toflking.smarttriggers.feature.trigger.runtime.ActionExecutorContext;
-import toflking.smarttriggers.feature.trigger.runtime.TriggerEvent;
 
 public class SoundAction implements ExecutableAction {
     private final String soundId;
@@ -11,7 +10,7 @@ public class SoundAction implements ExecutableAction {
     }
 
     @Override
-    public void execute(TriggerEvent event, ActionExecutorContext ctx) {
+    public void execute(ActionExecutorContext ctx) {
         ctx.playSound(soundId);
     }
 }

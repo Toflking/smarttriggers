@@ -116,8 +116,7 @@ public final class TriggerRulesUiSupport {
 
     private static int fieldWeight(ActionFieldSpec spec) {
         return switch (spec.type()) {
-            case BOOLEAN -> 1;
-            case INTEGER -> 1;
+            case BOOLEAN, INTEGER -> 1;
             case TEXT -> "key".equals(spec.key()) ? 2 : 1;
         };
     }

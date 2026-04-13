@@ -43,9 +43,9 @@ public final class HudLayout {
 
     public static Rect computeInteractionBounds(HudElement element, HudElementConfig ecfg, HudRenderContext ctx) {
         Rect bounds = computeBounds(element, ecfg, ctx);
-        int interactionWidth = Math.max(MIN_INTERACTION_SIZE, bounds.getWidth());
-        int interactionHeight = Math.max(MIN_INTERACTION_SIZE, bounds.getHeight());
-        return new Rect(bounds.getX(), bounds.getY(), interactionWidth, interactionHeight);
+        int interactionWidth = Math.max(MIN_INTERACTION_SIZE, bounds.width());
+        int interactionHeight = Math.max(MIN_INTERACTION_SIZE, bounds.height());
+        return new Rect(bounds.x(), bounds.y(), interactionWidth, interactionHeight);
     }
 
     public static int unapplyAnchorX(int finalX, int elementWidthScaled, int screenWidth, HudElementConfig.Anchor anchor) {

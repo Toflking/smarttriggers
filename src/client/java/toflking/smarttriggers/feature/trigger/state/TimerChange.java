@@ -7,6 +7,5 @@ public record TimerChange(
         long oldRemainingMs,
         long newRemainingMs,
         boolean oldRunning,
-        boolean newRunning,
-        long timestampMs
+        boolean newRunning
 ) implements StateChange {}

@@ -99,7 +99,7 @@ public class HudEditController {
 
        boolean rmbDown = isRmbDown();
        if  (rmbDown && !lastRmbDown) {
-           onRightClick(ctx);
+           onRightClick();
        } else if (!rmbDown && lastRmbDown) {
            saveIfDirtyDebounced();
        }
@@ -111,12 +111,12 @@ public class HudEditController {
    public void onMouseDown(HudRenderContext ctx) {
        if (!editMode) return;
        HudElement hit = hudManager.findElementAt(scaledX, scaledY, ctx);
-       if (hit == null || !hit.allowDrag()) return;
+       if (hit == null) return;
        dragging = hit;
        HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(hit);
        Rect b = HudLayout.computeInteractionBounds(hit, ecfg, ctx);
-       dragOffsetWithinElementX = scaledX - b.getX();
-       dragOffsetWithinElementY = scaledY - b.getY();
+       dragOffsetWithinElementX = scaledX - b.x();
+       dragOffsetWithinElementY = scaledY - b.y();
    }
 
    public void onMouseDrag(HudRenderContext ctx) {
@@ -202,7 +202,7 @@ public class HudEditController {
     }
 */
 
-    public void onRightClick(HudRenderContext ctx) {
+    public void onRightClick() {
         HudElement target;
         if (dragging != null) {
             target = dragging;
@@ -241,11 +241,11 @@ public class HudEditController {
            if (!ecfg.isEnabled()) {
                enabled = " (Disabled)";
            }
-           ctx.getDrawContext().fill(b.getX(), b.getY(), b.getX() + b.getWidth(), b.getY() + thickness, color);
-           ctx.getDrawContext().fill(b.getX(), b.getY(), b.getX() + thickness, b.getY() + b.getHeight(), color);
-           ctx.getDrawContext().fill(b.getX(), b.getY() + b.getHeight() - thickness, b.getX() + b.getWidth(), b.getY() + b.getHeight(), color);
-           ctx.getDrawContext().fill(b.getX() + b.getWidth() - thickness, b.getY(), b.getX() + b.getWidth(), b.getY() + b.getHeight(), color);
-           ctx.getDrawContext().drawText(ctx.getTextRenderer(), element.displayName() + enabled, b.getX(), b.getY() - mc.textRenderer.fontHeight, color, false);
+           ctx.getDrawContext().fill(b.x(), b.y(), b.x() + b.width(), b.y() + thickness, color);
+           ctx.getDrawContext().fill(b.x(), b.y(), b.x() + thickness, b.y() + b.height(), color);
+           ctx.getDrawContext().fill(b.x(), b.y() + b.height() - thickness, b.x() + b.width(), b.y() + b.height(), color);
+           ctx.getDrawContext().fill(b.x() + b.width() - thickness, b.y(), b.x() + b.width(), b.y() + b.height(), color);
+           ctx.getDrawContext().drawText(ctx.getTextRenderer(), element.displayName() + enabled, b.x(), b.y() - mc.textRenderer.fontHeight, color, false);
        }
    }
 

@@ -11,8 +11,8 @@ import toflking.smarttriggers.feature.trigger.state.TriggerStateStore;
 import toflking.smarttriggers.feature.trigger.text.LegacyFormattingTextParser;
 
 public class ActionExecutorContext {
-    TriggerStateStore stateStore;
-    MinecraftClient mc = MinecraftClient.getInstance();
+    private final TriggerStateStore stateStore;
+    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     public ActionExecutorContext(TriggerStateStore stateStore) {
         this.stateStore = stateStore;
@@ -39,7 +39,7 @@ public class ActionExecutorContext {
         mc.player.playSound(soundEvent,1.0F, 1.0F);
     }
 
-    public void execteCommand(String command) {
+    public void executeCommand(String command) {
         if (mc.player == null) return;
         String normalized = command.startsWith("/") ? command.substring(1) : command;
         mc.player.networkHandler.sendChatCommand(normalized);
