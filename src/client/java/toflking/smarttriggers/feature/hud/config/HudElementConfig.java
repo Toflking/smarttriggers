@@ -15,21 +15,23 @@ public class HudElementConfig {
         HudElementConfig counter = new HudElementConfig();
         counter.enabled = true;
         counter.anchor = Anchor.TOP_LEFT;
-        counter.x = 5;
-        counter.y = 5;
+        counter.x = 10;
+        counter.y = 10;
         counter.scale = 1.0f;
         counter.background = false;
-        counter.backgroundColor = 0x55000000;
+        counter.backgroundColor = 0x55FFFFFF;
         return counter;
     }
 
     public static HudElementConfig createDefaultFlag() {
         HudElementConfig flag = new HudElementConfig();
-        flag.enabled = false;
+        flag.enabled = true;
         flag.anchor = Anchor.TOP_LEFT;
-        flag.x = 5;
-        flag.y = 25;
+        flag.x = 10;
+        flag.y = 10;
         flag.scale = 1.0f;
+        flag.background = false;
+        flag.backgroundColor = 0x55FFFFFD;
         return flag;
     }
 
@@ -41,7 +43,7 @@ public class HudElementConfig {
         timer.y = 10;
         timer.scale = 1.0f;
         timer.background = false;
-        timer.backgroundColor = 0x55000000;
+        timer.backgroundColor = 0x55FFFFFE;
         return timer;
     }
 
@@ -65,6 +67,9 @@ public class HudElementConfig {
         if (ecfg.scale >= 5) {
             ecfg.scale = 5.0f;
             ConfigIO.setChanged(true);
+        }
+        if (ecfg.backgroundColor == 0) {
+            ecfg.backgroundColor = 0x55FFFFFF;
         }
     }
 

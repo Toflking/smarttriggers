@@ -40,14 +40,7 @@ public class Engine implements RuntimeReloader {
         stateStore.addListener(manager::onStateChanged);
         ClientTickEvents.END_CLIENT_TICK.register(client -> manager.tickTimers());
         registerSources(manager);
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> dispatcher.register(
-                ClientCommandManager.literal("smarttriggers")
-                        .executes(ctx -> {
-                            mc.execute(() -> mc.setScreen(new TriggerRulesScreen(mc.currentScreen, controller, this)));
-                            return 1;
-                        })
-        ));
+        registerCommands(mc, controller);
     }
 
     private void registerSources(Manager manager) {
@@ -61,6 +54,16 @@ public class Engine implements RuntimeReloader {
         scoreboardSource.register();
         tabListSource.register();
         titleSource.register();
+    }
+
+    private void registerCommands(MinecraftClient mc, TriggerRulesController controller) {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> dispatcher.register(
+                ClientCommandManager.literal("smarttriggers")
+                        .executes(ctx -> {
+                            mc.execute(() -> mc.setScreen(new TriggerRulesScreen(mc.currentScreen, controller, this)));
+                            return 1;
+                        })
+        ));
     }
 
     @Override
