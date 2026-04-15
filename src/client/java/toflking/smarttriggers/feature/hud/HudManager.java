@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.*;
+import static net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK;
 
 public class HudManager {
     private static HudManager instance;
@@ -104,7 +104,7 @@ public class HudManager {
         for (HudElement element : elements.values()) {
             HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(element);
             Rect bounds = HudLayout.computeBounds(element, ecfg, ctx);
-            if (ecfg.isEnabled()) {
+            if (ecfg.isVisible()) {
                 int finalX = bounds.x();
                 int finalY = bounds.y();
                 float scale = ecfg.getScale();

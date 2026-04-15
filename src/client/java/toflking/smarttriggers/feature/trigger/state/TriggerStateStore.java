@@ -45,6 +45,11 @@ public class TriggerStateStore {
         boolean oldValue = flags.remove(flag);
         notifyListeners(new FlagChange(flag, true, false, oldValue, false));
     }
+
+    public void removeAllFlags() {
+        flags.clear();
+    }
+
     public void toggleFlag(String flag) {
         setFlag(flag, !getFlag(flag));
     }
@@ -71,12 +76,17 @@ public class TriggerStateStore {
     public void resetCounter(String flag) {
         setCounter(flag, 0);
     }
+
     public void removeCounter(String flag) {
         if (!counters.containsKey(flag)) {
             return;
         }
         int oldValue = counters.remove(flag);
         notifyListeners(new CounterChange(flag, true, false, oldValue, 0));
+    }
+
+    public void removeAllCounters() {
+        counters.clear();
     }
 
     public void startTimer(String flag, long durationMs) {
@@ -118,6 +128,10 @@ public class TriggerStateStore {
             return;
         }
         notifyListeners(new TimerChange(flag, true, false, timerState.getRemainingMs(), 0L, timerState.isRunning(), false));
+    }
+
+    public void removeAllTimers() {
+        timers.clear();
     }
 
     public Map<String, Boolean> getFlags() {

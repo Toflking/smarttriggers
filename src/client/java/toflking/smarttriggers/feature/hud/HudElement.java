@@ -9,7 +9,7 @@ public abstract class HudElement {
     public abstract String displayName();
 
     public boolean isEnabled(ModConfig cfg) {
-        return cfg.getHud().getOrCreateHudElementConfig(this).isEnabled();
+        return cfg.getHud().getOrCreateHudElementConfig(this).isVisible();
     }
 
     public abstract HudElementConfig createDefaultConfig();

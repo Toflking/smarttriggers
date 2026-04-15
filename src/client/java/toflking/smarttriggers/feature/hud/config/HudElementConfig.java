@@ -3,7 +3,7 @@ package toflking.smarttriggers.feature.hud.config;
 import toflking.smarttriggers.core.config.ConfigIO;
 
 public class HudElementConfig {
-    private boolean enabled;
+    private boolean visible;
     private Anchor anchor;
     private float x;
     private float y;
@@ -13,7 +13,7 @@ public class HudElementConfig {
 
     public static HudElementConfig createDefaultCounter() {
         HudElementConfig counter = new HudElementConfig();
-        counter.enabled = true;
+        counter.visible = true;
         counter.anchor = Anchor.TOP_LEFT;
         counter.x = 10;
         counter.y = 10;
@@ -25,7 +25,7 @@ public class HudElementConfig {
 
     public static HudElementConfig createDefaultFlag() {
         HudElementConfig flag = new HudElementConfig();
-        flag.enabled = true;
+        flag.visible = true;
         flag.anchor = Anchor.TOP_LEFT;
         flag.x = 10;
         flag.y = 10;
@@ -37,7 +37,7 @@ public class HudElementConfig {
 
     public static HudElementConfig createDefaultTimer() {
         HudElementConfig timer = new HudElementConfig();
-        timer.enabled = true;
+        timer.visible = true;
         timer.anchor = Anchor.TOP_LEFT;
         timer.x = 10;
         timer.y = 10;
@@ -104,12 +104,12 @@ public class HudElementConfig {
         this.backgroundColor = backgroundColor;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isVisible() {
+        return visible;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     public float getScale() {

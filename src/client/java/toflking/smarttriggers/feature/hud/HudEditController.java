@@ -213,13 +213,13 @@ public class HudEditController {
         }
         if (!editMode) return;
         HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(target);
-        ecfg.setEnabled(!ecfg.isEnabled());
+        ecfg.setVisible(!ecfg.isVisible());
         dirty = true;
     }
 
     public void renderEditOverlay(HudRenderContext ctx) {
        if (mc.currentScreen != null && !(mc.currentScreen instanceof HudEditScreen)) return;
-       ctx.getDrawContext().drawText(ctx.getTextRenderer(), "Press Esc to exit, Left click to move, Right click to enable/disable", 5, 5, 0xFFFFFFFF, false);
+       ctx.getDrawContext().drawText(ctx.getTextRenderer(), "Press Esc to exit, Left click to move, Right click to show/hide", 5, 5, 0xFFFFFFFF, false);
        for (HudElement element : hudManager.getElements().values()) {
            HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(element);
            Rect b = HudLayout.computeInteractionBounds(element, ecfg, ctx);
@@ -238,8 +238,8 @@ public class HudEditController {
                thickness = 1;
            }
 
-           if (!ecfg.isEnabled()) {
-               enabled = " (Disabled)";
+           if (!ecfg.isVisible()) {
+               enabled = " (Hidden)";
            }
            ctx.getDrawContext().fill(b.x(), b.y(), b.x() + b.width(), b.y() + thickness, color);
            ctx.getDrawContext().fill(b.x(), b.y(), b.x() + thickness, b.y() + b.height(), color);
