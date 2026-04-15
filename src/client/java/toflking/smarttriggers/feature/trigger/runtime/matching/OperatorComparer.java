@@ -40,6 +40,10 @@ public class OperatorComparer {
             return false;
         }
 
+        if (!change.existsNow()) {
+            return false;
+        }
+
         return switch (operator) {
             case EXISTS -> change.existsNow();
             case MISSING -> !change.existsNow();
@@ -53,6 +57,10 @@ public class OperatorComparer {
         StateOperator operator = rule.getStateOperator();
         if (operator == null) {
             return false;
+        }
+
+        if (!change.existsNow()) {
+            return operator == StateOperator.MISSING;
         }
 
         return switch (operator) {
@@ -72,6 +80,10 @@ public class OperatorComparer {
         StateOperator operator = rule.getStateOperator();
         if (operator == null) {
             return false;
+        }
+
+        if (!change.existsNow()) {
+            return operator == StateOperator.MISSING;
         }
 
         TriggerStateStore.TimerState timerState = stateStore.getTimers().get(change.key());
