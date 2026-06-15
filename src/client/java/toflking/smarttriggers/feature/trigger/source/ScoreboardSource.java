@@ -1,26 +1,22 @@
 package toflking.smarttriggers.feature.trigger.source;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreboardDisplaySlot;
-import net.minecraft.scoreboard.ScoreboardEntry;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.text.Text;
-import toflking.smarttriggers.feature.trigger.runtime.TriggerEvent;
-import toflking.smarttriggers.feature.trigger.runtime.Manager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.scores.*;
 import toflking.smarttriggers.feature.trigger.enums.TextSource;
+import toflking.smarttriggers.feature.trigger.runtime.Manager;
+import toflking.smarttriggers.feature.trigger.runtime.TriggerEvent;
 
-import java.util.Comparator;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ScoreboardSource {
-    private static final Comparator<ScoreboardEntry> SIDEBAR_ORDER = Comparator
-            .comparingInt(ScoreboardEntry::value)
+    private static final Comparator<PlayerScoreEntry> SIDEBAR_ORDER = Comparator
+            .comparingInt(PlayerScoreEntry::value)
             .reversed()
-            .thenComparing(ScoreboardEntry::owner, String.CASE_INSENSITIVE_ORDER);
+            .thenComparing(PlayerScoreEntry::owner, String.CASE_INSENSITIVE_ORDER);
 
     private final Manager manager;
     private List<String> lastLines = Collections.emptyList();
@@ -33,22 +29,22 @@ public class ScoreboardSource {
         ClientTickEvents.END_CLIENT_TICK.register(client -> handleScoreboardSnapshot(pollScoreboard(client)));
     }
 
-    public List<Text> pollScoreboard(MinecraftClient mc) {
-        if (mc.world == null) return List.of();
+    public List<Component> pollScoreboard(Minecraft mc) {
+        if (mc.level == null) return List.of();
 
-        Scoreboard scoreboard = mc.world.getScoreboard();
-        ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
+        Scoreboard scoreboard = mc.level.getScoreboard();
+        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
         if (objective == null) return List.of();
 
-        return scoreboard.getScoreboardEntries(objective).stream()
-                .filter(entry -> !entry.hidden())
+        return scoreboard.listPlayerScores(objective).stream()
+                .filter(entry -> !entry.isHidden())
                 .sorted(SIDEBAR_ORDER)
                 .limit(15)
                 .map(entry -> toRenderedText(scoreboard, entry))
                 .toList();
     }
 
-    public void handleScoreboardSnapshot(List<Text> lines) {
+    public void handleScoreboardSnapshot(List<Component> lines) {
         List<String> normalizedLines = TextNormalizer.normalizeLines(lines);
         if (normalizedLines.isEmpty()) return;
         if (lastLines.equals(normalizedLines)) return;
@@ -57,11 +53,11 @@ public class ScoreboardSource {
         lastLines = normalizedLines;
     }
 
-    private Text toRenderedText(Scoreboard scoreboard, ScoreboardEntry entry) {
-        Team team = scoreboard.getScoreHolderTeam(entry.owner());
-        Text baseText = entry.display() != null ? entry.display().copy() : entry.name().copy();
+    private Component toRenderedText(Scoreboard scoreboard, PlayerScoreEntry entry) {
+        PlayerTeam team = scoreboard.getPlayersTeam(entry.owner());
+        Component baseText = entry.display() != null ? entry.display().copy() : entry.ownerName().copy();
         return entry.display() != null
                 ? baseText.copy()
-                : team != null ? Team.decorateName(team, baseText.copy()) : baseText.copy();
+                : team != null ? PlayerTeam.formatNameForTeam(team, baseText.copy()) : baseText.copy();
     }
 }

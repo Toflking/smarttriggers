@@ -1,46 +1,46 @@
 package toflking.smarttriggers.feature.hud;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.trigger.state.TriggerStateStore;
 
 public class HudRenderContext {
-    private DrawContext drawContext;
-    private final MinecraftClient client;
+    private GuiGraphicsExtractor guiGraphicsExtractor;
+    private final Minecraft client;
     private final int screenWidth;
     private final int screenHeight;
     private float tickDelta;
-    private final TextRenderer textRenderer;
+    private final Font font;
     private final ModConfig config;
     private final boolean editMode;
     private final TriggerStateStore stateStore;
 
-    public HudRenderContext(MinecraftClient client, DrawContext drawContext, RenderTickCounter tickDelta, ModConfig config, boolean editMode,  TriggerStateStore stateStore) {
+    public HudRenderContext(Minecraft client, GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker tickDelta, ModConfig config, boolean editMode, TriggerStateStore stateStore) {
         this.client = client;
-        this.drawContext = drawContext;
-        this.screenWidth = MinecraftClient.getInstance().getWindow().getScaledWidth();
-        this.screenHeight = MinecraftClient.getInstance().getWindow().getScaledHeight();
-        this.tickDelta = tickDelta.getTickProgress(true);
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.guiGraphicsExtractor = guiGraphicsExtractor;
+        this.screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        this.screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+        this.tickDelta = tickDelta.getGameTimeDeltaPartialTick(true);
+        this.font = Minecraft.getInstance().font;
         this.config = config;
         this.editMode = editMode;
         this.stateStore = stateStore;
     }
 
-    public HudRenderContext(MinecraftClient client, ModConfig config, boolean editMode, TriggerStateStore stateStore) {
+    public HudRenderContext(Minecraft client, ModConfig config, boolean editMode, TriggerStateStore stateStore) {
         this.client = client;
-        this.screenWidth = MinecraftClient.getInstance().getWindow().getScaledWidth();
-        this.screenHeight = MinecraftClient.getInstance().getWindow().getScaledHeight();
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        this.screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+        this.font = Minecraft.getInstance().font;
         this.config = config;
         this.editMode = editMode;
         this.stateStore = stateStore;
     }
 
-    public MinecraftClient getClient() {
+    public Minecraft getClient() {
         return client;
     }
 
@@ -48,8 +48,8 @@ public class HudRenderContext {
         return config;
     }
 
-    public DrawContext getDrawContext() {
-        return drawContext;
+    public GuiGraphicsExtractor getGuiGraphicsExtractor() {
+        return guiGraphicsExtractor;
     }
 
     public boolean isEditMode() {
@@ -64,8 +64,8 @@ public class HudRenderContext {
         return screenWidth;
     }
 
-    public TextRenderer getTextRenderer() {
-        return textRenderer;
+    public Font getFont() {
+        return font;
     }
 
     public float getTickDelta() {

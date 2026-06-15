@@ -1,49 +1,52 @@
 package toflking.smarttriggers.feature.trigger.ui.entry;
 
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.ParentElement;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreenHost;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class AbstractTriggerRuleEntry extends AlwaysSelectedEntryListWidget.Entry<AbstractTriggerRuleEntry> implements ParentElement {
+public abstract class AbstractTriggerRuleEntry extends ObjectSelectionList.Entry<AbstractTriggerRuleEntry> implements ContainerEventHandler {
     protected final TriggerRulesScreenHost host;
-    private final List<ClickableWidget> widgets = new ArrayList<>();
-    private Element focused;
+    private final List<AbstractWidget> widgets = new ArrayList<>();
+    private GuiEventListener focused;
     private boolean dragging;
 
     public AbstractTriggerRuleEntry(TriggerRulesScreenHost host) {
         this.host = host;
     }
 
-    public <T extends ClickableWidget> T addWidget(T widget) {
+    public <T extends AbstractWidget> T addWidget(T widget) {
         widgets.add(widget);
         return widget;
     }
 
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return widgets;
     }
 
     @Override
-    public Element getFocused() {
+    public GuiEventListener getFocused() {
         return focused;
     }
 
     @Override
-    public void setFocused(Element focused) {
-        if (this.focused instanceof TextFieldWidget previousField) {
+    public void setFocused(GuiEventListener focused) {
+        if (this.focused instanceof EditBox previousField) {
             previousField.setFocused(false);
         }
         this.focused = focused;
-        if (focused instanceof TextFieldWidget focusedField) {
+        if (focused instanceof EditBox focusedField) {
             focusedField.setFocused(true);
         }
     }
@@ -59,8 +62,8 @@ public abstract class AbstractTriggerRuleEntry extends AlwaysSelectedEntryListWi
     }
 
     @Override
-    public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
-        for (ClickableWidget widget : widgets) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubleClick) {
+        for (AbstractWidget widget : widgets) {
             if (widget.mouseClicked(click, doubleClick)) {
                 setFocused(widget);
                 return true;
@@ -71,42 +74,42 @@ public abstract class AbstractTriggerRuleEntry extends AlwaysSelectedEntryListWi
     }
 
     @Override
-    public boolean mouseReleased(net.minecraft.client.gui.Click click) {
-        return ParentElement.super.mouseReleased(click);
+    public boolean mouseReleased(MouseButtonEvent click) {
+        return ContainerEventHandler.super.mouseReleased(click);
     }
 
     @Override
-    public boolean mouseDragged(net.minecraft.client.gui.Click click, double deltaX, double deltaY) {
-        return ParentElement.super.mouseDragged(click, deltaX, deltaY);
+    public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
+        return ContainerEventHandler.super.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        return ParentElement.super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        return ContainerEventHandler.super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override
-    public boolean keyPressed(net.minecraft.client.input.KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         return focused != null && focused.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(net.minecraft.client.input.KeyInput keyInput) {
+    public boolean keyReleased(KeyEvent keyInput) {
         return focused != null && focused.keyReleased(keyInput);
     }
 
     @Override
-    public boolean charTyped(net.minecraft.client.input.CharInput charInput) {
+    public boolean charTyped(CharacterEvent charInput) {
         return focused != null && focused.charTyped(charInput);
     }
 
     @Override
-    public void forEachChild(Consumer<ClickableWidget> consumer) {
+    public void visitWidgets(Consumer<AbstractWidget> consumer) {
         widgets.forEach(consumer);
     }
 
     @Override
-    public Text getNarration() {
-        return Text.literal("Trigger rule entry");
+    public Component getNarration() {
+        return Component.literal("Trigger rule entry");
     }
 }

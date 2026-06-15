@@ -1,9 +1,9 @@
 package toflking.smarttriggers.feature.trigger.text;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 public final class LegacyFormattingTextParser {
     private static final char SECTION_SIGN = '§';
@@ -12,12 +12,12 @@ public final class LegacyFormattingTextParser {
     private LegacyFormattingTextParser() {
     }
 
-    public static Text parse(String input) {
+    public static MutableComponent parse(String input) {
         if (input == null || input.isEmpty()) {
-            return Text.empty();
+            return Component.empty();
         }
 
-        MutableText root = Text.empty();
+        MutableComponent root = Component.empty();
         StringBuilder segment = new StringBuilder();
         Style currentStyle = Style.EMPTY;
 
@@ -28,7 +28,7 @@ public final class LegacyFormattingTextParser {
                 continue;
             }
 
-            Formatting formatting = Formatting.byCode(Character.toLowerCase(input.charAt(i + 1)));
+            ChatFormatting formatting = ChatFormatting.getByCode(Character.toLowerCase(input.charAt(i + 1)));
             if (formatting == null) {
                 segment.append(current);
                 continue;
@@ -47,16 +47,16 @@ public final class LegacyFormattingTextParser {
         return c == SECTION_SIGN || c == AMPERSAND;
     }
 
-    private static void appendSegment(MutableText root, StringBuilder segment, Style style) {
+    private static void appendSegment(MutableComponent root, StringBuilder segment, Style style) {
         if (segment.isEmpty()) {
             return;
         }
-        root.append(Text.literal(segment.toString()).setStyle(style));
+        root.append(Component.literal(segment.toString()).setStyle(style));
         segment.setLength(0);
     }
 
-    private static Style applyFormatting(Style baseStyle, Formatting formatting) {
-        if (formatting == Formatting.RESET) {
+    private static Style applyFormatting(Style baseStyle, ChatFormatting formatting) {
+        if (formatting == ChatFormatting.RESET) {
             return Style.EMPTY;
         }
         if (formatting.isColor()) {
@@ -66,7 +66,7 @@ public final class LegacyFormattingTextParser {
         return switch (formatting) {
             case BOLD -> baseStyle.withBold(true);
             case ITALIC -> baseStyle.withItalic(true);
-            case UNDERLINE -> baseStyle.withUnderline(true);
+            case UNDERLINE -> baseStyle.withUnderlined(true);
             case STRIKETHROUGH -> baseStyle.withStrikethrough(true);
             case OBFUSCATED -> baseStyle.withObfuscated(true);
             default -> baseStyle;

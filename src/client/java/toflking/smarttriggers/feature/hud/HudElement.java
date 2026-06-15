@@ -17,7 +17,7 @@ public abstract class HudElement {
     public abstract void render(HudRenderContext ctx);
 
     public void renderBackground(HudRenderContext ctx, Rect bounds, int color) {
-        ctx.getDrawContext().fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), color);
+        ctx.getGuiGraphicsExtractor().fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), color);
     }
 
     public abstract int width(HudRenderContext ctx);

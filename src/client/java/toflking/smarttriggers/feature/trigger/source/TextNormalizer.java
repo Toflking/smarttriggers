@@ -1,6 +1,6 @@
 package toflking.smarttriggers.feature.trigger.source;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,11 +10,11 @@ import java.util.regex.Pattern;
 public class TextNormalizer {
     private static final Pattern MC_FORMATTING = Pattern.compile("§.");
 
-    public static String toPlainString(Text text) {
+    public static String toPlainString(Component text) {
         return text.getString();
     }
 
-    public static String normalizeText(Text text) {
+    public static String normalizeText(Component text) {
         if (text == null) return "";
         String normalizedText = toPlainString(text);
         normalizedText = MC_FORMATTING.matcher(normalizedText).replaceAll("");
@@ -24,10 +24,10 @@ public class TextNormalizer {
         return normalizedText;
     }
 
-    public static List<String> normalizeLines(List<Text> lines) {
+    public static List<String> normalizeLines(List<Component> lines) {
         if (lines == null) return Collections.emptyList();
         List<String> normalizedLines = new ArrayList<>(lines.size());
-        for (Text line : lines) {
+        for (Component line : lines) {
             String normalized = normalizeText(line);
             if (!normalized.isBlank()) {
                 normalizedLines.add(normalized);

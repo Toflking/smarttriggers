@@ -1,15 +1,15 @@
 package toflking.smarttriggers.feature.trigger.ui.widget;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.ObjectSelectionList;
 import toflking.smarttriggers.feature.trigger.ui.entry.AbstractTriggerRuleEntry;
 import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreenHost;
 
-public final class RuleListWidget extends AlwaysSelectedEntryListWidget<AbstractTriggerRuleEntry> {
+public final class RuleListWidget extends ObjectSelectionList<AbstractTriggerRuleEntry> {
     private final TriggerRulesScreenHost host;
 
-    public RuleListWidget(MinecraftClient client, TriggerRulesScreenHost host, int width, int height, int y, int itemHeight) {
+    public RuleListWidget(Minecraft client, TriggerRulesScreenHost host, int width, int height, int y, int itemHeight) {
         super(client, width, height, y, itemHeight);
         this.host = host;
     }
@@ -28,16 +28,16 @@ public final class RuleListWidget extends AlwaysSelectedEntryListWidget<Abstract
     }
 
     @Override
-    protected boolean isEntrySelectionAllowed() {
+    protected boolean entriesCanBeSelected() {
         return false;
     }
 
     @Override
-    protected void drawSelectionHighlight(DrawContext context, AbstractTriggerRuleEntry entry, int borderColor) {
+    protected void extractSelection(GuiGraphicsExtractor context, AbstractTriggerRuleEntry entry, int borderColor) {
     }
 
     @Override
-    protected int getScrollbarX() {
+    protected int scrollBarX() {
         return host.layout().contentRight() + 10;
     }
 }

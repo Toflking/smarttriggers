@@ -1,9 +1,9 @@
 package toflking.smarttriggers.feature.trigger.ui.screen;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.input.MouseButtonEvent;
 import toflking.smarttriggers.feature.trigger.ui.layout.TriggerRulesLayout;
 import toflking.smarttriggers.feature.trigger.ui.meta.ActionFieldSpec;
 import toflking.smarttriggers.feature.trigger.ui.state.ActionEditorState;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public interface TriggerRulesScreenHost {
-    TextRenderer textRenderer();
+    Font textRenderer();
 
     TriggerRulesLayout layout();
 
@@ -28,13 +28,13 @@ public interface TriggerRulesScreenHost {
 
     boolean hasActionIssue(RuleEditorState rule, int actionIndex, ValidationField field);
 
-    void drawErrorOutline(DrawContext ctx, ClickableWidget widget);
+    void drawErrorOutline(GuiGraphicsExtractor ctx, AbstractWidget widget);
 
     void cycleStateOperator(RuleEditorState rule);
 
     void cycleStateOperator(RuleEditorState rule, boolean forward);
 
-    boolean isRightClick(Click click);
+    boolean isRightClick(MouseButtonEvent click);
 
     void playButtonClickSound();
 
@@ -56,7 +56,7 @@ public interface TriggerRulesScreenHost {
 
     void showOverlaySuggestions(int x, int y, int width, List<String> suggestions);
 
-    void renderOverlaySuggestions(DrawContext ctx);
+    void renderOverlaySuggestions(GuiGraphicsExtractor ctx);
 
     void setSuggestionsOpened(boolean suggestionsOpened);
 

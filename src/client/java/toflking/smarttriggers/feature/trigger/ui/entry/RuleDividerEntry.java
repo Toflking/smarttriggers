@@ -1,6 +1,6 @@
 package toflking.smarttriggers.feature.trigger.ui.entry;
 
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreenHost;
 
 public final class RuleDividerEntry extends AbstractTriggerRuleEntry {
@@ -9,7 +9,7 @@ public final class RuleDividerEntry extends AbstractTriggerRuleEntry {
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void extractContent(GuiGraphicsExtractor ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int centerY = getY() + (host.rowHeight() / 2);
         int left = host.layout().contentLeft();
         int right = host.layout().contentRight();
