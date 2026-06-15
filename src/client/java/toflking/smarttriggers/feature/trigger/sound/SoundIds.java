@@ -1,12 +1,12 @@
 package toflking.smarttriggers.feature.trigger.sound;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 public class SoundIds {
-    private static final List<String> SOUND_IDS = Registries.SOUND_EVENT.getIds().stream()
+    private static final List<String> SOUND_IDS = BuiltInRegistries.SOUND_EVENT.keySet().stream()
             .map(Identifier::toString)
             .sorted()
             .toList();

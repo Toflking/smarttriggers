@@ -1,10 +1,10 @@
 package toflking.smarttriggers.feature.trigger.source;
 
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.minecraft.text.Text;
-import toflking.smarttriggers.feature.trigger.runtime.TriggerEvent;
-import toflking.smarttriggers.feature.trigger.runtime.Manager;
+import net.minecraft.network.chat.Component;
 import toflking.smarttriggers.feature.trigger.enums.TextSource;
+import toflking.smarttriggers.feature.trigger.runtime.Manager;
+import toflking.smarttriggers.feature.trigger.runtime.TriggerEvent;
 
 
 public class ChatSource {
@@ -35,7 +35,7 @@ public class ChatSource {
         }
     }
 
-    public void onChatMessage(Text message) {
+    public void onChatMessage(Component message) {
         if (suppressCapture) return;
         if (message == null) return;
         String msg = TextNormalizer.normalizeText(message);

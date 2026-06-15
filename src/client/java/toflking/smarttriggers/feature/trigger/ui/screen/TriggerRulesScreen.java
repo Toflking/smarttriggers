@@ -1,18 +1,25 @@
 package toflking.smarttriggers.feature.trigger.ui.screen;
 
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import toflking.smarttriggers.core.config.ConfigIO;
 import toflking.smarttriggers.feature.trigger.RuntimeReloader;
+import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
+import toflking.smarttriggers.feature.trigger.enums.StateOperator;
 import toflking.smarttriggers.feature.trigger.ui.TriggerRulesController;
 import toflking.smarttriggers.feature.trigger.ui.entry.*;
 import toflking.smarttriggers.feature.trigger.ui.layout.TriggerRulesLayout;
+import toflking.smarttriggers.feature.trigger.ui.meta.ActionFieldSpec;
+import toflking.smarttriggers.feature.trigger.ui.state.ActionEditorState;
+import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
 import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 import toflking.smarttriggers.feature.trigger.ui.widget.RuleListWidget;
 import toflking.smarttriggers.feature.trigger.validation.StateOperatorSupport;
@@ -20,11 +27,6 @@ import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 import toflking.smarttriggers.feature.trigger.validation.ValidationIssue;
 import toflking.smarttriggers.feature.trigger.validation.ValidationResult;
 import toflking.smarttriggers.feature.trigger.validation.editor.TriggerEditorValidator;
-import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
-import toflking.smarttriggers.feature.trigger.enums.StateOperator;
-import toflking.smarttriggers.feature.trigger.ui.state.ActionEditorState;
-import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
-import toflking.smarttriggers.feature.trigger.ui.meta.ActionFieldSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +58,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     private Consumer<String> overlaySelectHandler;
 
     public TriggerRulesScreen(Screen parent, TriggerRulesController controller, RuntimeReloader applier) {
-        super(Text.literal("Trigger Rules"));
+        super(Component.literal("Trigger Rules"));
         this.parent = parent;
         this.controller = controller;
         this.applier = applier;
@@ -64,38 +66,38 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
 
     @Override
     protected void init() {
-        clearChildren();
+        clearWidgets();
         layout = new TriggerRulesLayout(width);
 
-        addDrawableChild(ButtonWidget.builder(
-                Text.literal("New Rule"),
+        addRenderableWidget(Button.builder(
+                Component.literal("New Rule"),
                 button -> {
                     controller.addRule();
                     rebuildRuleWidgets();
                 }
-        ).dimensions((width / 2) - 106, 20, 100, 20).build());
+        ).bounds((width / 2) - 106, 20, 100, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(
-                Text.literal("Edit Gui Locations"),
+        addRenderableWidget(Button.builder(
+                Component.literal("Edit Gui Locations"),
                 button -> {
                     if (saveConfig()) {
                         controller.getHudEditController().toggleEditMode(this);
                     }
                 }
-        ).dimensions((width / 2) + 6, 20, 100, 20).build());
+        ).bounds((width / 2) + 6, 20, 100, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(
-                Text.literal("Save"),
+        addRenderableWidget(Button.builder(
+                Component.literal("Save"),
                 button -> save()
-        ).dimensions((width / 2) - 106, height - 24, 100, 20).build());
+        ).bounds((width / 2) - 106, height - 24, 100, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(
-                Text.literal("Close"),
-                button -> close()
-        ).dimensions((width / 2) + 6, height - 24, 100, 20).build());
+        addRenderableWidget(Button.builder(
+                Component.literal("Close"),
+                button -> onClose()
+        ).bounds((width / 2) + 6, height - 24, 100, 20).build());
 
-        ruleListWidget = addDrawableChild(new RuleListWidget(
-                client,
+        ruleListWidget = addRenderableWidget(new RuleListWidget(
+                minecraft,
                 this,
                 width,
                 height - 76,
@@ -108,7 +110,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
 
     public void save() {
         if (saveConfig()) {
-            close();
+            onClose();
         }
     }
 
@@ -143,8 +145,8 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 
     @Override
@@ -176,8 +178,8 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public net.minecraft.client.font.TextRenderer textRenderer() {
-        return textRenderer;
+    public net.minecraft.client.gui.Font textRenderer() {
+        return font;
     }
 
     @Override
@@ -201,20 +203,20 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         clearOverlaySuggestions();
         String title = "Smart Trigger Configuration Screen";
-        int titleX = (width - textRenderer.getWidth(title)) / 2;
-        ctx.drawText(textRenderer, title, titleX, 8, 0xFFFFFFFF, false);
+        int titleX = (width - font.width(title)) / 2;
+        ctx.text(font, title, titleX, 8, 0xFFFFFFFF, false);
         if (validationSummary != null) {
-            ctx.drawText(textRenderer, validationSummary, layout.contentLeft(), 8, 0xFFFF7070, false);
+            ctx.text(font, validationSummary, layout.contentLeft(), 8, 0xFFFF7070, false);
         }
-        super.render(ctx, mouseX, mouseY, delta);
+        super.extractRenderState(ctx, mouseX, mouseY, delta);
         renderOverlaySuggestions(ctx);
     }
 
     @Override
-    public boolean keyPressed(net.minecraft.client.input.KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         if (ruleListWidget != null && ruleListWidget.keyPressed(keyInput)) {
             return true;
         }
@@ -222,7 +224,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public boolean keyReleased(net.minecraft.client.input.KeyInput keyInput) {
+    public boolean keyReleased(KeyEvent keyInput) {
         if (ruleListWidget != null && ruleListWidget.keyReleased(keyInput)) {
             return true;
         }
@@ -230,7 +232,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public boolean charTyped(net.minecraft.client.input.CharInput charInput) {
+    public boolean charTyped(CharacterEvent charInput) {
         if (ruleListWidget != null && ruleListWidget.charTyped(charInput)) {
             return true;
         }
@@ -258,7 +260,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public void drawErrorOutline(DrawContext ctx, ClickableWidget widget) {
+    public void drawErrorOutline(GuiGraphicsExtractor ctx, AbstractWidget widget) {
         TriggerRulesUiSupport.drawErrorOutline(ctx, widget);
     }
 
@@ -323,7 +325,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
                 entryIndex += 4 + rule.getActions().size();
             }
         }
-        ruleListWidget.setScrollY((double) entryIndex * ROW_HEIGHT);
+        ruleListWidget.setScrollAmount((double) entryIndex * ROW_HEIGHT);
     }
 
     @Override
@@ -347,16 +349,16 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public boolean isRightClick(net.minecraft.client.gui.Click click) {
+    public boolean isRightClick(net.minecraft.client.input.MouseButtonEvent click) {
         return click.button() == 1;
     }
 
     @Override
     public void playButtonClickSound() {
-        if (client == null) {
+        if (minecraft == null) {
             return;
         }
-        client.getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     @Override
@@ -389,7 +391,7 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
     }
 
     @Override
-    public void renderOverlaySuggestions(DrawContext ctx) {
+    public void renderOverlaySuggestions(GuiGraphicsExtractor ctx) {
         if (overlaySuggestions.isEmpty()) {
             return;
         }
@@ -406,12 +408,12 @@ public class TriggerRulesScreen extends Screen implements TriggerRulesScreenHost
 
         for (int i = 0; i < overlaySuggestions.size(); i++) {
             int lineY = boxTop + 2 + (i * OVERLAY_ROW_HEIGHT);
-            ctx.drawText(textRenderer, overlaySuggestions.get(i), overlaySuggestionsX + OVERLAY_PADDING_X, lineY, OVERLAY_TEXT_COLOR, false);
+            ctx.text(font, overlaySuggestions.get(i), overlaySuggestionsX + OVERLAY_PADDING_X, lineY, OVERLAY_TEXT_COLOR, false);
         }
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (!suggestionsOpened) return super.mouseClicked(click, doubled);
         if (!(click.x() >= overlaySuggestionsX && click.x() <= overlaySuggestionsX + overlaySuggestionsWidth && click.y() >= overlaySuggestionsY && click.y() <= overlaySuggestionsY + overlaySuggestionsHeight)) return super.mouseClicked(click, doubled);
         for (int i = 0; i < overlaySuggestions.size(); i++) {

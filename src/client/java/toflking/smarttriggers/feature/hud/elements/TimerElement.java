@@ -1,8 +1,8 @@
 package toflking.smarttriggers.feature.hud.elements;
 
-import toflking.smarttriggers.feature.hud.config.HudElementConfig;
 import toflking.smarttriggers.feature.hud.HudElement;
 import toflking.smarttriggers.feature.hud.HudRenderContext;
+import toflking.smarttriggers.feature.hud.config.HudElementConfig;
 import toflking.smarttriggers.feature.trigger.state.TriggerStateStore;
 
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class TimerElement extends HudElement {
     public void render(HudRenderContext ctx) {
         int yOffset = 0;
         for (String line : buildLines(ctx)) {
-            ctx.getDrawContext().drawText(ctx.getTextRenderer(), line, 0, yOffset, 0xFFFFFFFF, false);
-            yOffset += ctx.getTextRenderer().fontHeight;
+            ctx.getGuiGraphicsExtractor().text(ctx.getFont(), line, 0, yOffset, 0xFFFFFFFF, false);
+            yOffset += ctx.getFont().lineHeight;
         }
     }
 
@@ -41,14 +41,14 @@ public class TimerElement extends HudElement {
     public int width(HudRenderContext ctx) {
         int maxWidth = 0;
         for (String line : buildLines(ctx)) {
-            maxWidth = Math.max(maxWidth, ctx.getTextRenderer().getWidth(line));
+            maxWidth = Math.max(maxWidth, ctx.getFont().width(line));
         }
         return maxWidth;
     }
 
     @Override
     public int height(HudRenderContext ctx) {
-        return ctx.getTextRenderer().fontHeight * buildLines(ctx).size();
+        return ctx.getFont().lineHeight * buildLines(ctx).size();
     }
 
     private List<String> buildLines(HudRenderContext ctx) {

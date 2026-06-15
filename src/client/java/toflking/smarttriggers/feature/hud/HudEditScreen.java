@@ -1,8 +1,8 @@
 package toflking.smarttriggers.feature.hud;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.DoubleConsumer;
 
@@ -14,24 +14,24 @@ public class HudEditScreen extends Screen {
     private final HudEditController controller;
 
     protected HudEditScreen(Screen parent, HudEditController controller, DoubleConsumer onScroll) {
-        super(Text.literal("HUD Edit"));
+        super(Component.literal("HUD Edit"));
         this.parent = parent;
         this.controller = controller;
         this.onScroll = onScroll;
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         controller.toggleEditMode(parent);
     }
 

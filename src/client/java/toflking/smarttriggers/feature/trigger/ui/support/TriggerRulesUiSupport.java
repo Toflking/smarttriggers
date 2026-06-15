@@ -1,8 +1,8 @@
 package toflking.smarttriggers.feature.trigger.ui.support;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.EditBox;
 import toflking.smarttriggers.feature.trigger.enums.ActionType;
 import toflking.smarttriggers.feature.trigger.enums.TimerFormat;
 import toflking.smarttriggers.feature.trigger.ui.meta.ActionFieldSpec;
@@ -96,13 +96,13 @@ public final class TriggerRulesUiSupport {
         }
     }
 
-    public static void syncField(TextFieldWidget field, String value) {
-        if (!Objects.equals(field.getText(), value) && !field.isFocused()) {
-            field.setText(value);
+    public static void syncField(EditBox field, String value) {
+        if (!Objects.equals(field.getValue(), value) && !field.isFocused()) {
+            field.setValue(value);
         }
     }
 
-    public static void drawErrorOutline(DrawContext ctx, ClickableWidget widget) {
+    public static void drawErrorOutline(GuiGraphicsExtractor ctx, AbstractWidget widget) {
         int color = 0xFFFF5555;
         int x = widget.getX();
         int y = widget.getY();

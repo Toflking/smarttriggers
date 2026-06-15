@@ -1,24 +1,25 @@
 package toflking.smarttriggers.feature.trigger.ui.entry;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.registry.Registries;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 import toflking.smarttriggers.feature.trigger.enums.ActionType;
 import toflking.smarttriggers.feature.trigger.enums.TimerFormat;
 import toflking.smarttriggers.feature.trigger.ui.layout.TriggerRulesLayout;
-import toflking.smarttriggers.feature.trigger.ui.support.SoundIdFilter;
-import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 import toflking.smarttriggers.feature.trigger.ui.meta.ActionFieldSpec;
 import toflking.smarttriggers.feature.trigger.ui.meta.ActionUiMeta;
 import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreenHost;
 import toflking.smarttriggers.feature.trigger.ui.state.ActionEditorState;
 import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
+import toflking.smarttriggers.feature.trigger.ui.support.SoundIdFilter;
+import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 
 import java.util.ArrayList;
@@ -32,11 +33,11 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
     private final RuleEditorState rule;
     private final ActionEditorState action;
     private final int actionIndex;
-    private final ButtonWidget actionTypeButton;
-    private final ButtonWidget timerTypeButton;
-    private final ButtonWidget previewButton;
-    private final ButtonWidget addButton;
-    private final ButtonWidget removeButton;
+    private final Button actionTypeButton;
+    private final Button timerTypeButton;
+    private final Button previewButton;
+    private final Button addButton;
+    private final Button removeButton;
     private final List<ActionFieldSpec> fieldSpecs;
     private final List<ActionFieldComponent> fieldComponents = new ArrayList<>();
 
@@ -46,50 +47,50 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         this.action = action;
         this.actionIndex = actionIndex;
 
-        actionTypeButton = addWidget(ButtonWidget.builder(
-                Text.literal(action.getType().getDisplay()),
+        actionTypeButton = addWidget(Button.builder(
+                Component.literal(action.getType().getDisplay()),
                 button -> {
                     action.setType(action.getType().next());
                     host.markDirty();
                     host.rebuildRuleWidgets();
                 }
-        ).dimensions(0, 0, host.layout().actionTypeWidth(), 20).build());
+        ).bounds(0, 0, host.layout().actionTypeWidth(), 20).build());
 
         timerTypeButton = action.getType() == ActionType.START_TIMER
-                ? addWidget(ButtonWidget.builder(
-                Text.literal(host.getTimerTypeLabel(action)),
+                ? addWidget(Button.builder(
+                Component.literal(host.getTimerTypeLabel(action)),
                 button -> {
                     TimerFormat currentType = action.getTimerType();
                     action.setTimerType((currentType == null ? TimerFormat.SECONDS : currentType).next());
                     host.markDirty();
                 }
-        ).dimensions(0, 0, TriggerRulesLayout.ACTION_TIMER_TYPE_WIDTH, 20).build())
+        ).bounds(0, 0, TriggerRulesLayout.ACTION_TIMER_TYPE_WIDTH, 20).build())
                 : null;
 
         previewButton = action.getType() == ActionType.SOUND
-                ? addWidget(ButtonWidget.builder(
-                Text.literal("▶"),
+                ? addWidget(Button.builder(
+                Component.literal("▶"),
                 button -> playPreviewSound()
-        ).dimensions(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build())
+        ).bounds(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build())
                 : null;
 
-        removeButton = actionIndex == 0 ? null : addWidget(ButtonWidget.builder(
-                Text.literal("-"),
+        removeButton = actionIndex == 0 ? null : addWidget(Button.builder(
+                Component.literal("-"),
                 button -> {
                     rule.getActions().remove(actionIndex);
                     host.markDirty();
                     host.rebuildRuleWidgets();
                 }
-        ).dimensions(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build());
+        ).bounds(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build());
 
-        addButton = addWidget(ButtonWidget.builder(
-                Text.literal("+"),
+        addButton = addWidget(Button.builder(
+                Component.literal("+"),
                 button -> {
                     rule.getActions().add(actionIndex + 1, host.createDefaultAction());
                     host.markDirty();
                     host.rebuildRuleWidgets();
                 }
-        ).dimensions(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build());
+        ).bounds(0, 0, TriggerRulesLayout.ACTION_ROW_BUTTON_WIDTH, 20).build());
 
         fieldSpecs = ActionUiMeta.getFieldSpecs(action.getType());
         for (ActionFieldSpec spec : fieldSpecs) {
@@ -100,7 +101,7 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
     }
 
     @Override
-    public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubleClick) {
         if (host.isRightClick(click)) {
             if (actionTypeButton.isMouseOver(click.x(), click.y())) {
                 host.playButtonClickSound();
@@ -123,19 +124,20 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
     }
 
     @Override
-    public Text getNarration() {
-        return Text.literal("Action " + (actionIndex + 1));
+    public Component getNarration() {
+        return Component.literal("Action " + (actionIndex + 1));
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void extractContent(GuiGraphicsExtractor ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int y = getY();
-        ctx.drawText(host.textRenderer(), Text.literal((actionIndex + 1) + "."), host.layout().contentLeft() + TriggerRulesLayout.ACTION_INDEX_X, y + 7, 0xFFFFFFFF, false);
+        ctx.text(host.textRenderer(), Component.literal((actionIndex + 1) + "."), host.layout().contentLeft() + TriggerRulesLayout.ACTION_INDEX_X, y + 7, 0xFFFFFFFF, false);
 
-        actionTypeButton.setMessage(Text.literal(action.getType().getDisplay()));
+        actionTypeButton.setMessage(Component.literal(action.getType().getDisplay()));
         actionTypeButton.setWidth(host.layout().actionTypeWidth());
-        actionTypeButton.setPosition(host.layout().actionTypeX(), y);
-        actionTypeButton.render(ctx, mouseX, mouseY, tickProgress);
+        actionTypeButton.setX(host.layout().actionTypeX());
+        actionTypeButton.setY(y);
+        actionTypeButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         if (host.hasActionIssue(rule, actionIndex, ValidationField.ACTION_TYPE)) {
             host.drawErrorOutline(ctx, actionTypeButton);
         }
@@ -144,7 +146,7 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         int[] fieldWidths = TriggerRulesUiSupport.computeFieldWidths(fieldSpecs, actionContentFieldWidth(), TriggerRulesLayout.ACTION_FIELD_GAP);
         for (int i = 0; i < fieldComponents.size(); i++) {
             int width = fieldWidths[i];
-            fieldComponents.get(i).render(ctx, currentX, y, width, mouseX, mouseY, tickProgress);
+            fieldComponents.get(i).extract(ctx, currentX, y, width, mouseX, mouseY, tickProgress);
             ValidationField field = host.toValidationField(fieldSpecs.get(i));
             if (field != null && host.hasActionIssue(rule, actionIndex, field)) {
                 host.drawErrorOutline(ctx, fieldComponents.get(i).widget());
@@ -153,53 +155,57 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         }
 
         if (timerTypeButton != null) {
-            timerTypeButton.setMessage(Text.literal(host.getTimerTypeLabel(action)));
+            timerTypeButton.setMessage(Component.literal(host.getTimerTypeLabel(action)));
             timerTypeButton.setWidth(TriggerRulesLayout.ACTION_TIMER_TYPE_WIDTH);
-            timerTypeButton.setPosition(host.layout().actionTimerTypeButtonX(), y);
-            timerTypeButton.render(ctx, mouseX, mouseY, tickProgress);
+            timerTypeButton.setX(host.layout().actionTimerTypeButtonX());
+            timerTypeButton.setY(y);
+            timerTypeButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
             if (host.hasActionIssue(rule, actionIndex, ValidationField.ACTION_TIMER_TYPE)) {
                 host.drawErrorOutline(ctx, timerTypeButton);
             }
         }
 
         if (previewButton != null) {
-            previewButton.setPosition(actionPreviewButtonX(), y);
-            previewButton.render(ctx, mouseX, mouseY, tickProgress);
+            previewButton.setX(actionPreviewButtonX());
+            previewButton.setY(y);
+            previewButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         }
 
         if (removeButton != null) {
-            removeButton.setPosition(host.layout().actionRemoveButtonX(), y);
-            removeButton.render(ctx, mouseX, mouseY, tickProgress);
+            removeButton.setX(host.layout().actionRemoveButtonX());
+            removeButton.setY(y);
+            removeButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         }
-        addButton.setPosition(host.layout().actionAddButtonX(), y);
-        addButton.render(ctx, mouseX, mouseY, tickProgress);
+        addButton.setX(host.layout().actionAddButtonX());
+        addButton.setY(y);
+        addButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
     }
 
     private ActionFieldComponent createFieldComponent(ActionFieldSpec spec) {
         if (spec.type() == ActionFieldSpec.ActionFieldType.BOOLEAN) {
-            ButtonWidget button = ButtonWidget.builder(
-                    Text.empty(),
+            Button button = Button.builder(
+                    Component.empty(),
                     widget -> {
                         boolean currentValue = Boolean.parseBoolean(TriggerRulesUiSupport.readActionField(action, spec.key()));
                         TriggerRulesUiSupport.writeActionField(action, spec.key(), String.valueOf(!currentValue));
                         host.markDirty();
-                        widget.setMessage(Text.literal(spec.label() + ": " + !currentValue));
+                        widget.setMessage(Component.literal(spec.label() + ": " + !currentValue));
                     }
-            ).dimensions(0, 0, 100, 20).build();
+            ).bounds(0, 0, 100, 20).build();
 
             return new ActionFieldComponent(button) {
                 @Override
                 void beforeRender() {
                     boolean currentValue = Boolean.parseBoolean(TriggerRulesUiSupport.readActionField(action, spec.key()));
-                    button.setMessage(Text.literal(spec.label() + ": " + currentValue));
+                    button.setMessage(Component.literal(spec.label() + ": " + currentValue));
                 }
             };
         }
 
-        TextFieldWidget field = new TextFieldWidget(host.textRenderer(), 0, 0, 100, 20, Text.literal(spec.label()));
+        EditBox field = new EditBox(host.textRenderer(), 0, 0, 100, 20, Component.literal(spec.label()));
         field.setMaxLength(ACTION_FIELD_MAX_LENGTH);
-        field.setText(Objects.toString(TriggerRulesUiSupport.readActionField(action, spec.key()), ""));
-        field.setPlaceholder(Text.literal(spec.label()));
+        field.setValue(Objects.toString(TriggerRulesUiSupport.readActionField(action, spec.key()), ""));
+        field.setHint(Component.literal(spec.label()));
         if (spec.key().equals("soundId")) {
             return new SoundIdFieldComponent(field, value -> {
                 TriggerRulesUiSupport.writeActionField(action, spec.key(), value);
@@ -208,13 +214,13 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
                 @Override
                 void beforeRender() {
                     String expected = Objects.toString(TriggerRulesUiSupport.readActionField(action, spec.key()), "");
-                    if (!Objects.equals(field.getText(), expected) && !field.isFocused()) {
-                        field.setText(expected);
+                    if (!Objects.equals(field.getValue(), expected) && !field.isFocused()) {
+                        field.setValue(expected);
                     }
                 }
             };
         }
-        field.setChangedListener(value -> {
+        field.setResponder(value -> {
             TriggerRulesUiSupport.writeActionField(action, spec.key(), value);
             host.markDirty();
         });
@@ -222,8 +228,8 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
             @Override
             void beforeRender() {
                 String expected = Objects.toString(TriggerRulesUiSupport.readActionField(action, spec.key()), "");
-                if (!Objects.equals(field.getText(), expected) && !field.isFocused()) {
-                    field.setText(expected);
+                if (!Objects.equals(field.getValue(), expected) && !field.isFocused()) {
+                    field.setValue(expected);
                 }
             }
         };
@@ -251,33 +257,37 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
             return;
         }
 
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             return;
         }
 
         try {
-            SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(soundId));
+            SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.getValue(Identifier.parse(soundId));
+            if (soundEvent == null) {
+                return;
+            }
             mc.player.playSound(soundEvent, 1.0F, 1.0F);
         } catch (RuntimeException ignored) {
         }
     }
 
     private abstract static class ActionFieldComponent {
-        private final ClickableWidget widget;
+        private final AbstractWidget widget;
 
-        private ActionFieldComponent(ClickableWidget widget) {
+        private ActionFieldComponent(AbstractWidget widget) {
             this.widget = widget;
         }
 
-        void render(DrawContext ctx, int x, int y, int width, int mouseX, int mouseY, float tickProgress) {
+        void extract(GuiGraphicsExtractor ctx, int x, int y, int width, int mouseX, int mouseY, float tickProgress) {
             widget.setWidth(width);
-            widget.setPosition(x, y);
+            widget.setX(x);
+            widget.setY(y);
             beforeRender();
-            widget.render(ctx, mouseX, mouseY, tickProgress);
+            widget.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         }
 
-        ClickableWidget widget() {
+        AbstractWidget widget() {
             return widget;
         }
 
@@ -289,21 +299,21 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         private static final int SUGGESTION_OFFSET_Y = 2;
 
         private final List<String> suggestions = new ArrayList<>();
-        private final TextFieldWidget field;
+        private final EditBox field;
         private final Consumer<String> onChanged;
 
-        private SoundIdFieldComponent(TextFieldWidget field, Consumer<String> onChanged) {
+        private SoundIdFieldComponent(EditBox field, Consumer<String> onChanged) {
             super(field);
             this.field = field;
             this.onChanged = onChanged;
 
-            field.setChangedListener(value -> {
+            field.setResponder(value -> {
                 onChanged.accept(value);
                 calculateNewSuggestions(value);
             });
-            calculateNewSuggestions(field.getText());
+            calculateNewSuggestions(field.getValue());
             host.setOverlaySelectHandler(selectedSuggestion -> {
-                field.setText(selectedSuggestion);
+                field.setValue(selectedSuggestion);
                 onChanged.accept(selectedSuggestion);
             });
         }
@@ -314,8 +324,8 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
         }
 
         @Override
-        public void render(DrawContext ctx, int x, int y, int width, int mouseX, int mouseY, float tickProgress) {
-            super.render(ctx, x, y, width, mouseX, mouseY, tickProgress);
+        public void extract(GuiGraphicsExtractor ctx, int x, int y, int width, int mouseX, int mouseY, float tickProgress) {
+            super.extract(ctx, x, y, width, mouseX, mouseY, tickProgress);
             if (!field.isFocused() || suggestions.isEmpty()) {
                 host.setSuggestionsOpened(false);
                 return;
@@ -323,7 +333,7 @@ public final class ActionEntry extends AbstractTriggerRuleEntry {
 
             int visibleSuggestions = Math.min(MAX_SUGGESTIONS, suggestions.size());
             host.setOverlaySelectHandler(selectedSuggestion -> {
-                field.setText(selectedSuggestion);
+                field.setValue(selectedSuggestion);
                 onChanged.accept(selectedSuggestion);
             });
             host.showOverlaySuggestions(x, y + field.getHeight() + SUGGESTION_OFFSET_Y, width, suggestions.subList(0, visibleSuggestions));

@@ -3,7 +3,7 @@ package toflking.smarttriggers.feature.trigger;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.hud.HudEditController;
 import toflking.smarttriggers.feature.trigger.compilation.ActionFactory;
@@ -23,15 +23,15 @@ import toflking.smarttriggers.feature.trigger.validation.config.TriggerConfigVal
 
 import java.util.List;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
 
 public class Engine implements RuntimeReloader {
     private Manager manager;
     private Compiler compiler;
 
     public void init(ModConfig config, TriggerStateStore stateStore, HudEditController hudEditController) {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
         ActionExecutorContext context = new ActionExecutorContext(stateStore);
         ActionFactory factory = new ActionFactory();
         compiler = new Compiler(factory);
@@ -59,11 +59,11 @@ public class Engine implements RuntimeReloader {
         titleSource.register();
     }
 
-    private void registerCommands(MinecraftClient mc, TriggerRulesController controller, TriggerStateStore stateStore, HudEditController hudEditController) {
+    private void registerCommands(Minecraft mc, TriggerRulesController controller, TriggerStateStore stateStore, HudEditController hudEditController) {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> dispatcher.register(
                 literal("smarttriggers")
                         .executes(ctx -> {
-                            mc.execute(() -> mc.setScreen(new TriggerRulesScreen(mc.currentScreen, controller, this)));
+                            mc.execute(() -> mc.setScreen(new TriggerRulesScreen(mc.screen, controller, this)));
                             return 1;
                         })
                         .then(literal("clear")

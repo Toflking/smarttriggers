@@ -2,10 +2,10 @@ package toflking.smarttriggers.feature.hud;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2fStack;
 import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.hud.config.HudElementConfig;
@@ -23,7 +23,7 @@ import static net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 
 public class HudManager {
     private static HudManager instance;
-    private final MinecraftClient mc;
+    private final Minecraft mc;
     private final LinkedHashMap<String, HudElement> elements = new LinkedHashMap<>();
     private final ModConfig config;
     private HudEditController hudEditController;
@@ -33,7 +33,7 @@ public class HudManager {
 
     public static HudManager init(ModConfig cfg, TriggerStateStore stateStore) {
         if (instance != null) return instance;
-        instance = new HudManager(MinecraftClient.getInstance(), cfg, stateStore);
+        instance = new HudManager(Minecraft.getInstance(), cfg, stateStore);
         if (!initialized) {
             instance.registerDefaults();
             for (HudElement e : instance.elements.values()) {
@@ -42,7 +42,7 @@ public class HudManager {
 
             HudElementRegistry.attachElementAfter(
                     VanillaHudElements.MISC_OVERLAYS,
-                    Identifier.of("smarttriggers", "hud"),
+                    Identifier.fromNamespaceAndPath("smarttriggers", "hud"),
                     instance::renderAll
             );
 
@@ -55,7 +55,7 @@ public class HudManager {
         return instance;
     }
 
-    private HudManager(MinecraftClient mc,  ModConfig cfg, TriggerStateStore stateStore) {
+    private HudManager(Minecraft mc, ModConfig cfg, TriggerStateStore stateStore) {
         this.mc = mc;
         this.config = cfg;
         this.stateStore = stateStore;
@@ -89,8 +89,8 @@ public class HudManager {
         hudEditController.onClientTick(ctx);
     }
 
-    private void renderAll(DrawContext drawContext, RenderTickCounter counter) {
-        if (mc.options.hudHidden) return;
+    private void renderAll(GuiGraphicsExtractor drawContext, DeltaTracker counter) {
+        if (mc.options.hideGui) return;
         if (hudEditController == null) return;
         HudRenderContext ctx = new HudRenderContext(mc, drawContext, counter, config, hudEditController.isEditMode(), stateStore);
         for (HudElement element : elements.values()) {
@@ -108,7 +108,7 @@ public class HudManager {
                 int finalX = bounds.x();
                 int finalY = bounds.y();
                 float scale = ecfg.getScale();
-                Matrix3x2fStack matrices = drawContext.getMatrices();
+                Matrix3x2fStack matrices = drawContext.pose();
                 matrices.pushMatrix();
                 matrices.translate((float) finalX, (float) finalY);
                 matrices.scale(scale, scale);

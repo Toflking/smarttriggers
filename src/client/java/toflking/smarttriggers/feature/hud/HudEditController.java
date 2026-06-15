@@ -1,17 +1,17 @@
 package toflking.smarttriggers.feature.hud;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import org.lwjgl.glfw.GLFW;
 import toflking.smarttriggers.core.config.ConfigIO;
 import toflking.smarttriggers.core.config.ModConfig;
 import toflking.smarttriggers.feature.hud.config.HudElementConfig;
 
-import static net.minecraft.util.math.MathHelper.clamp;
-import static net.minecraft.util.math.MathHelper.sign;
+import static net.minecraft.util.Mth.clamp;
+import static net.minecraft.util.Mth.sign;
 
 public class HudEditController {
-    private final MinecraftClient mc;
+    private final Minecraft mc;
     private final HudManager hudManager;
     private final ModConfig config;
     private boolean editMode;
@@ -32,7 +32,7 @@ public class HudEditController {
     private HudEditController(HudManager mgr, ModConfig cfg) {
         this.hudManager = mgr;
         this.config = cfg;
-        this.mc = MinecraftClient.getInstance();
+        this.mc = Minecraft.getInstance();
     }
 
     public static HudEditController init(HudManager hudManager, ModConfig cfg) {
@@ -54,7 +54,7 @@ public class HudEditController {
 
        this.hovered = null;
        this.dragging = null;
-       mc.mouse.lockCursor();
+       mc.mouseHandler.grabMouse();
        mc.setScreen(parent);
        if (dirty) {
            ConfigIO.save(config);
@@ -70,15 +70,15 @@ public class HudEditController {
            lastRmbDown = isRmbDown();
            return;
        }
-       if (mc.currentScreen != null && !(mc.currentScreen instanceof HudEditScreen)) return;
-       if (mc.currentScreen == null) {
+       if (mc.screen != null && !(mc.screen instanceof HudEditScreen)) return;
+       if (mc.screen == null) {
            mc.setScreen(hudEditScreen);
        }
-       if (mc.mouse.isCursorLocked()) {
-           mc.mouse.unlockCursor();
+       if (mc.mouseHandler.isMouseGrabbed()) {
+           mc.mouseHandler.releaseMouse();
        }
-       int mouseX = Math.round((float) mc.mouse.getX());
-       int mouseY = Math.round((float) mc.mouse.getY());
+       int mouseX = Math.round((float) mc.mouseHandler.xpos());
+       int mouseY = Math.round((float) mc.mouseHandler.ypos());
        int windowWidth = mc.getWindow().getWidth();
        int windowHeight = mc.getWindow().getHeight();
        scaledX = mouseX * ctx.getScreenWidth() / windowWidth;
@@ -218,8 +218,8 @@ public class HudEditController {
     }
 
     public void renderEditOverlay(HudRenderContext ctx) {
-       if (mc.currentScreen != null && !(mc.currentScreen instanceof HudEditScreen)) return;
-       ctx.getDrawContext().drawText(ctx.getTextRenderer(), "Press Esc to exit, Left click to move, Right click to show/hide", 5, 5, 0xFFFFFFFF, false);
+       if (mc.screen != null && !(mc.screen instanceof HudEditScreen)) return;
+       ctx.getGuiGraphicsExtractor().text(ctx.getFont(), "Press Esc to exit, Left click to move, Right click to show/hide", 5, 5, 0xFFFFFFFF, false);
        for (HudElement element : hudManager.getElements().values()) {
            HudElementConfig ecfg = config.getHud().getOrCreateHudElementConfig(element);
            Rect b = HudLayout.computeInteractionBounds(element, ecfg, ctx);
@@ -241,26 +241,26 @@ public class HudEditController {
            if (!ecfg.isVisible()) {
                enabled = " (Hidden)";
            }
-           ctx.getDrawContext().fill(b.x(), b.y(), b.x() + b.width(), b.y() + thickness, color);
-           ctx.getDrawContext().fill(b.x(), b.y(), b.x() + thickness, b.y() + b.height(), color);
-           ctx.getDrawContext().fill(b.x(), b.y() + b.height() - thickness, b.x() + b.width(), b.y() + b.height(), color);
-           ctx.getDrawContext().fill(b.x() + b.width() - thickness, b.y(), b.x() + b.width(), b.y() + b.height(), color);
-           ctx.getDrawContext().drawText(ctx.getTextRenderer(), element.displayName() + enabled, b.x(), b.y() - mc.textRenderer.fontHeight, color, false);
+           ctx.getGuiGraphicsExtractor().fill(b.x(), b.y(), b.x() + b.width(), b.y() + thickness, color);
+           ctx.getGuiGraphicsExtractor().fill(b.x(), b.y(), b.x() + thickness, b.y() + b.height(), color);
+           ctx.getGuiGraphicsExtractor().fill(b.x(), b.y() + b.height() - thickness, b.x() + b.width(), b.y() + b.height(), color);
+           ctx.getGuiGraphicsExtractor().fill(b.x() + b.width() - thickness, b.y(), b.x() + b.width(), b.y() + b.height(), color);
+           ctx.getGuiGraphicsExtractor().text(ctx.getFont(), element.displayName() + enabled, b.x(), b.y() - mc.font.lineHeight, color, false);
        }
    }
 
     public boolean isLmbDown() {
-        long handle = mc.getWindow().getHandle();
+        long handle = mc.getWindow().handle();
         return GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
     }
 
     public boolean isRmbDown() {
-       long handle = mc.getWindow().getHandle();
+       long handle = mc.getWindow().handle();
        return GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
     }
 
     public boolean isShiftDown() {
-        return mc.options.sneakKey.isPressed();
+        return mc.options.keyShift.isDown();
     }
 
 }

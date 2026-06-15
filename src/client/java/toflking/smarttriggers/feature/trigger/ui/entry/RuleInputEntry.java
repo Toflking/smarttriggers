@@ -1,26 +1,27 @@
 package toflking.smarttriggers.feature.trigger.ui.entry;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
 import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreenHost;
-import toflking.smarttriggers.feature.trigger.validation.StateOperatorSupport;
 import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
+import toflking.smarttriggers.feature.trigger.validation.StateOperatorSupport;
 import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 
 public final class RuleInputEntry extends AbstractTriggerRuleEntry {
     private final RuleEditorState rule;
-    private final ButtonWidget inputTypeButton;
-    private final ButtonWidget sourceOrOperatorButton;
-    private final ButtonWidget matchButton;
+    private final Button inputTypeButton;
+    private final Button sourceOrOperatorButton;
+    private final Button matchButton;
 
     public RuleInputEntry(TriggerRulesScreenHost host, RuleEditorState rule) {
         super(host);
         this.rule = rule;
 
-        inputTypeButton = addWidget(ButtonWidget.builder(
-                Text.literal(rule.getInputType().getDisplay()),
+        inputTypeButton = addWidget(Button.builder(
+                Component.literal(rule.getInputType().getDisplay()),
                 button -> {
                     rule.setInputType(rule.getInputType().next());
                     if (rule.getInputType() != RuleInputType.TEXT && !StateOperatorSupport.isOperatorSupported(rule.getStateOperator(), rule.getInputType())) {
@@ -29,10 +30,10 @@ public final class RuleInputEntry extends AbstractTriggerRuleEntry {
                     host.markDirty();
                     host.rebuildRuleWidgets();
                 }
-        ).dimensions(0, 0, host.layout().inputButtonWidth(), 20).build());
+        ).bounds(0, 0, host.layout().inputButtonWidth(), 20).build());
 
-        sourceOrOperatorButton = addWidget(ButtonWidget.builder(
-                Text.empty(),
+        sourceOrOperatorButton = addWidget(Button.builder(
+                Component.empty(),
                 button -> {
                     if (rule.getInputType() == RuleInputType.TEXT) {
                         rule.setSource(rule.getSource().next());
@@ -40,10 +41,10 @@ public final class RuleInputEntry extends AbstractTriggerRuleEntry {
                     host.markDirty();
                     host.rebuildRuleWidgets();
                 }
-        ).dimensions(0, 0, host.layout().compactButtonWidth(), 20).build());
+        ).bounds(0, 0, host.layout().compactButtonWidth(), 20).build());
 
-        matchButton = addWidget(ButtonWidget.builder(
-                Text.empty(),
+        matchButton = addWidget(Button.builder(
+                Component.empty(),
                 button -> {
                     if (rule.getInputType() == RuleInputType.TEXT) {
                         rule.setMatchType(rule.getMatchType().next());
@@ -53,11 +54,11 @@ public final class RuleInputEntry extends AbstractTriggerRuleEntry {
                     host.markDirty();
                     host.rebuildRuleWidgets();
                 }
-        ).dimensions(0, 0, host.layout().compactButtonWidth(), 20).build());
+        ).bounds(0, 0, host.layout().compactButtonWidth(), 20).build());
     }
 
     @Override
-    public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubleClick) {
         if (host.isRightClick(click)) {
             if (inputTypeButton.isMouseOver(click.x(), click.y())) {
                 host.playButtonClickSound();
@@ -92,32 +93,36 @@ public final class RuleInputEntry extends AbstractTriggerRuleEntry {
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void extractContent(GuiGraphicsExtractor ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int y = getY();
-        inputTypeButton.setMessage(Text.literal(rule.getInputType().getDisplay()));
+        inputTypeButton.setMessage(Component.literal(rule.getInputType().getDisplay()));
         inputTypeButton.setWidth(host.layout().inputButtonWidth());
-        sourceOrOperatorButton.setMessage(Text.literal(host.getSourceButtonLabel(rule)));
+        sourceOrOperatorButton.setMessage(Component.literal(host.getSourceButtonLabel(rule)));
         sourceOrOperatorButton.active = rule.getInputType() == RuleInputType.TEXT;
         sourceOrOperatorButton.visible = rule.getInputType() == RuleInputType.TEXT;
         sourceOrOperatorButton.setWidth(host.layout().compactButtonWidth());
-        matchButton.setMessage(Text.literal(host.getMatchButtonLabel(rule)));
+        matchButton.setMessage(Component.literal(host.getMatchButtonLabel(rule)));
         matchButton.setWidth(host.layout().compactButtonWidth());
         matchButton.active = true;
         matchButton.visible = true;
 
-        inputTypeButton.setPosition(host.layout().contentLeft(), y);
+        inputTypeButton.setX(host.layout().contentLeft());
+        inputTypeButton.setY(y);
         if (rule.getInputType() == RuleInputType.TEXT) {
-            sourceOrOperatorButton.setPosition(host.layout().sourceButtonX(), y);
-            matchButton.setPosition(host.layout().matchButtonX(), y);
+            sourceOrOperatorButton.setX(host.layout().sourceButtonX());
+            sourceOrOperatorButton.setY(y);
+            matchButton.setX(host.layout().matchButtonX());
+            matchButton.setY(y);
         } else {
-            matchButton.setPosition(host.layout().sourceButtonX(), y);
+            matchButton.setX(host.layout().sourceButtonX());
+            matchButton.setY(y);
         }
 
-        inputTypeButton.render(ctx, mouseX, mouseY, tickProgress);
+        inputTypeButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         if (rule.getInputType() == RuleInputType.TEXT) {
-            sourceOrOperatorButton.render(ctx, mouseX, mouseY, tickProgress);
+            sourceOrOperatorButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         }
-        matchButton.render(ctx, mouseX, mouseY, tickProgress);
+        matchButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
 
         if (host.hasRuleIssue(rule, ValidationField.INPUT_TYPE)) {
             host.drawErrorOutline(ctx, inputTypeButton);

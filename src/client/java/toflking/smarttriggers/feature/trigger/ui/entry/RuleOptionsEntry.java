@@ -1,16 +1,17 @@
 package toflking.smarttriggers.feature.trigger.ui.entry;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import toflking.smarttriggers.feature.trigger.enums.RuleInputType;
 import toflking.smarttriggers.feature.trigger.enums.TimerFormat;
 import toflking.smarttriggers.feature.trigger.ui.layout.TriggerRulesLayout;
-import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 import toflking.smarttriggers.feature.trigger.ui.screen.TriggerRulesScreenHost;
 import toflking.smarttriggers.feature.trigger.ui.state.RuleEditorState;
+import toflking.smarttriggers.feature.trigger.ui.support.TriggerRulesUiSupport;
 import toflking.smarttriggers.feature.trigger.validation.ValidationField;
 
 import java.util.Objects;
@@ -19,61 +20,61 @@ public final class RuleOptionsEntry extends AbstractTriggerRuleEntry {
     private static final int RULE_FIELD_MAX_LENGTH = 512;
 
     private final RuleEditorState rule;
-    private final TextFieldWidget keyField;
-    private final TextFieldWidget patternField;
-    private final CheckboxWidget caseSensitiveCheckbox;
-    private final TextFieldWidget cooldownField;
-    private final ButtonWidget cooldownTypeButton;
+    private final EditBox keyField;
+    private final EditBox patternField;
+    private final Checkbox caseSensitiveCheckbox;
+    private final EditBox cooldownField;
+    private final Button cooldownTypeButton;
 
     public RuleOptionsEntry(TriggerRulesScreenHost host, RuleEditorState rule) {
         super(host);
         this.rule = rule;
 
-        keyField = addWidget(new TextFieldWidget(host.textRenderer(), 0, 0, 100, 20, Text.literal("Key")));
+        keyField = addWidget(new EditBox(host.textRenderer(), 0, 0, 100, 20, Component.literal("Key")));
         keyField.setMaxLength(RULE_FIELD_MAX_LENGTH);
-        keyField.setText(Objects.toString(rule.getKey(), ""));
-        keyField.setPlaceholder(Text.literal("Key"));
-        keyField.setChangedListener(value -> {
+        keyField.setValue(Objects.toString(rule.getKey(), ""));
+        keyField.setHint(Component.literal("Key"));
+        keyField.setResponder(value -> {
             rule.setKey(value);
             host.markDirty();
         });
 
-        patternField = addWidget(new TextFieldWidget(host.textRenderer(), 0, 0, 100, 20, Text.literal("Pattern")));
+        patternField = addWidget(new EditBox(host.textRenderer(), 0, 0, 100, 20, Component.literal("Pattern")));
         patternField.setMaxLength(RULE_FIELD_MAX_LENGTH);
-        patternField.setText(Objects.toString(rule.getPattern(), ""));
-        patternField.setChangedListener(value -> {
+        patternField.setValue(Objects.toString(rule.getPattern(), ""));
+        patternField.setResponder(value -> {
             rule.setPattern(value);
             host.markDirty();
         });
 
-        caseSensitiveCheckbox = addWidget(CheckboxWidget.builder(
-                Text.literal("Case Sensitive"),
+        caseSensitiveCheckbox = addWidget(Checkbox.builder(
+                Component.literal("Case Sensitive"),
                 host.textRenderer()
-        ).pos(0, 0).checked(rule.isCaseSensitive()).callback((checkbox, checked) -> {
+        ).pos(0, 0).selected(rule.isCaseSensitive()).onValueChange((checkbox, checked) -> {
             rule.setCaseSensitive(checked);
             host.markDirty();
         }).build());
 
-        cooldownField = addWidget(new TextFieldWidget(host.textRenderer(), 0, 0, 90, 20, Text.literal("Cooldown")));
-        cooldownField.setText(Objects.toString(rule.getCooldownString(), "0:00"));
-        cooldownField.setPlaceholder(Text.literal("Cooldown"));
-        cooldownField.setChangedListener(value -> {
+        cooldownField = addWidget(new EditBox(host.textRenderer(), 0, 0, 90, 20, Component.literal("Cooldown")));
+        cooldownField.setValue(Objects.toString(rule.getCooldownString(), "0:00"));
+        cooldownField.setHint(Component.literal("Cooldown"));
+        cooldownField.setResponder(value -> {
             rule.setCooldownString(value);
             host.markDirty();
         });
 
-        cooldownTypeButton = addWidget(ButtonWidget.builder(
-                Text.literal(host.getCooldownTypeLabel(rule)),
+        cooldownTypeButton = addWidget(Button.builder(
+                Component.literal(host.getCooldownTypeLabel(rule)),
                 button -> {
                     TimerFormat currentType = rule.getCooldownType();
                     rule.setCooldownType((currentType == null ? TimerFormat.SECONDS : currentType).next());
                     host.markDirty();
                 }
-        ).dimensions(0, 0, TriggerRulesLayout.COOLDOWN_TIMER_TYPE_WIDTH, 20).build());
+        ).bounds(0, 0, TriggerRulesLayout.COOLDOWN_TIMER_TYPE_WIDTH, 20).build());
     }
 
     @Override
-    public boolean mouseClicked(net.minecraft.client.gui.Click click, boolean doubleClick) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubleClick) {
         if (host.isRightClick(click) && cooldownTypeButton.isMouseOver(click.x(), click.y())) {
             host.playButtonClickSound();
             TimerFormat currentType = rule.getCooldownType();
@@ -86,7 +87,7 @@ public final class RuleOptionsEntry extends AbstractTriggerRuleEntry {
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void extractContent(GuiGraphicsExtractor ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int y = getY();
         boolean textInput = rule.getInputType() == RuleInputType.TEXT;
         boolean unaryStateOperator = rule.getInputType() != RuleInputType.TEXT
@@ -102,26 +103,29 @@ public final class RuleOptionsEntry extends AbstractTriggerRuleEntry {
             patternField.visible = true;
             patternField.active = true;
             patternField.setSuggestion(null);
-            patternField.setPlaceholder(Text.literal("Pattern"));
+            patternField.setHint(Component.literal("Pattern"));
             patternField.setWidth(host.layout().textPatternWidth());
-            patternField.setPosition(x, y);
-            patternField.render(ctx, mouseX, mouseY, tickProgress);
+            patternField.setX(x);
+            patternField.setY(y);
+            patternField.extractRenderState(ctx, mouseX, mouseY, tickProgress);
             x += host.layout().textPatternWidth() + TriggerRulesLayout.ACTION_FIELD_GAP;
         } else {
             keyField.visible = true;
             keyField.active = true;
             keyField.setWidth(host.layout().stateKeyWidth());
-            keyField.setPosition(x, y);
-            keyField.render(ctx, mouseX, mouseY, tickProgress);
+            keyField.setX(x);
+            keyField.setY(y);
+            keyField.extractRenderState(ctx, mouseX, mouseY, tickProgress);
             x += host.layout().stateKeyWidth() + TriggerRulesLayout.ACTION_FIELD_GAP;
 
             patternField.visible = !unaryStateOperator;
             patternField.active = !unaryStateOperator;
             if (!unaryStateOperator) {
-                patternField.setPlaceholder(Text.literal(rule.getInputType() == RuleInputType.FLAG ? "Value" : "Pattern"));
+                patternField.setHint(Component.literal(rule.getInputType() == RuleInputType.FLAG ? "Value" : "Pattern"));
                 patternField.setWidth(host.layout().statePatternWidth());
-                patternField.setPosition(x, y);
-                patternField.render(ctx, mouseX, mouseY, tickProgress);
+                patternField.setX(x);
+                patternField.setY(y);
+                patternField.extractRenderState(ctx, mouseX, mouseY, tickProgress);
                 x += host.layout().statePatternWidth() + TriggerRulesLayout.ACTION_FIELD_GAP;
             }
         }
@@ -129,17 +133,20 @@ public final class RuleOptionsEntry extends AbstractTriggerRuleEntry {
         caseSensitiveCheckbox.visible = textInput;
         caseSensitiveCheckbox.active = textInput;
         if (textInput) {
-            caseSensitiveCheckbox.setPosition(x, y + 2);
-            caseSensitiveCheckbox.render(ctx, mouseX, mouseY, tickProgress);
+            caseSensitiveCheckbox.setX(x);
+            caseSensitiveCheckbox.setY(y + 2);
+            caseSensitiveCheckbox.extractRenderState(ctx, mouseX, mouseY, tickProgress);
         }
 
         cooldownField.setWidth(host.layout().cooldownFieldWidth());
-        cooldownField.setPosition(host.layout().cooldownFieldX(), y);
-        cooldownField.render(ctx, mouseX, mouseY, tickProgress);
-        cooldownTypeButton.setMessage(Text.literal(host.getCooldownTypeLabel(rule)));
+        cooldownField.setX(host.layout().cooldownFieldX());
+        cooldownField.setY(y);
+        cooldownField.extractRenderState(ctx, mouseX, mouseY, tickProgress);
+        cooldownTypeButton.setMessage(Component.literal(host.getCooldownTypeLabel(rule)));
         cooldownTypeButton.setWidth(TriggerRulesLayout.COOLDOWN_TIMER_TYPE_WIDTH);
-        cooldownTypeButton.setPosition(host.layout().cooldownTypeButtonX(), y);
-        cooldownTypeButton.render(ctx, mouseX, mouseY, tickProgress);
+        cooldownTypeButton.setX(host.layout().cooldownTypeButtonX());
+        cooldownTypeButton.setY(y);
+        cooldownTypeButton.extractRenderState(ctx, mouseX, mouseY, tickProgress);
 
         if (!textInput && host.hasRuleIssue(rule, ValidationField.RULE_KEY)) {
             host.drawErrorOutline(ctx, keyField);
